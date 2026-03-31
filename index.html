@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pose Estimation MVP</title>
+    <title>Unchair</title>
     <!-- MediaPipe CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"
+        crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
 
     <style>
@@ -32,7 +34,8 @@
             align-items: center;
         }
 
-        video, canvas {
+        video,
+        canvas {
             position: absolute;
             max-width: 100%;
             max-height: 100%;
@@ -127,6 +130,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <button id="start-btn">Start</button>
@@ -212,7 +216,7 @@
             // Drawing skeleton
             ctx.save();
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
+
             if (results.poseLandmarks) {
                 // Since we processed a square crop, we need to map landmarks back
                 // from [0, 1] relative to the square to [0, 1] relative to the whole video.
@@ -230,18 +234,18 @@
 
                 const mpPose = window.Pose || {};
                 const mpDraw = window;
-                
+
                 const connectors = window.POSE_CONNECTIONS || mpPose.POSE_CONNECTIONS;
                 const drawConn = mpDraw.drawConnectors;
                 const drawLand = mpDraw.drawLandmarks;
 
                 if (drawConn && connectors) {
                     drawConn(ctx, adjustedLandmarks, connectors,
-                             {color: '#00FF00', lineWidth: 4});
+                        { color: '#00FF00', lineWidth: 4 });
                 }
                 if (drawLand) {
                     drawLand(ctx, adjustedLandmarks,
-                              {color: '#FF0000', lineWidth: 2, radius: 4});
+                        { color: '#FF0000', lineWidth: 2, radius: 4 });
                 }
             }
             ctx.restore();
@@ -269,7 +273,7 @@
 
             // Send to MediaPipe
             try {
-                await pose.send({image: hiddenCanvas});
+                await pose.send({ image: hiddenCanvas });
             } catch (err) {
                 console.error('Error sending frame to Pose:', err);
             }
@@ -319,7 +323,7 @@
                 const updateSize = () => {
                     const vWidth = video.videoWidth;
                     const vHeight = video.videoHeight;
-                    
+
                     // Match canvas to video aspect ratio and scale to fit window
                     const winWidth = window.innerWidth;
                     const winHeight = window.innerHeight;
@@ -339,7 +343,7 @@
                     canvas.height = vHeight;
                     video.width = vWidth;
                     video.height = vHeight;
-                    
+
                     canvas.style.width = `${targetWidth}px`;
                     canvas.style.height = `${targetHeight}px`;
                     video.style.width = `${targetWidth}px`;
@@ -354,7 +358,7 @@
 
                 isStarted = true;
                 statusEl.textContent = 'Works well :)';
-                
+
                 processFrame();
             } catch (err) {
                 console.error('Camera Error:', err);
@@ -362,7 +366,7 @@
                 if (err.name === 'NotAllowedError') errorMsg = 'Access denied by browser!';
                 else if (err.name === 'NotFoundError') errorMsg = 'Camera not found!';
                 else if (err.name === 'NotReadableError') errorMsg = 'Camera is busy!';
-                
+
                 statusEl.innerHTML = `<span style="color: #ff4444">Error: ${err.name} - ${errorMsg}</span>`;
                 startBtn.style.display = 'block';
             }
@@ -373,4 +377,5 @@
 
     </script>
 </body>
+
 </html>
