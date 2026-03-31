@@ -5,10 +5,15 @@
 ![GitHub forks](https://img.shields.io/github/forks/Vitgracer/Unchair?style=social)
 
 
-# Unchair
+# ⚡ Unchair: Get Out of Your Chair
 ![Unchair Banner](assets/logo_cut.jpg)
 
-Real-time browser-based pose tracking game using web-camera and computer vision. Designed as a fun office break tool to encourage movement while working. Works locally without server.
+**Stop sitting all day!** Unchair helps you stay active at your desk. It uses your webcam to track your moves and make office breaks fun.
+
+### Why Unchair?
+- **Private.** No video is ever sent to a server.
+- **Simple.** Works in your browser, no install needed.
+- **Fun.** A better way to spend your break.
 
 To test locally: 
 python -m http.server 8000
