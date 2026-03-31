@@ -363,12 +363,17 @@
             } catch (err) {
                 console.error('Camera Error:', err);
                 let errorMsg = err.message;
-                if (err.name === 'NotAllowedError') errorMsg = 'Access denied by browser!';
-                else if (err.name === 'NotFoundError') errorMsg = 'Camera not found!';
-                else if (err.name === 'NotReadableError') errorMsg = 'Camera is busy!';
+                if (err.name === 'NotAllowedError') {
+                    errorMsg = 'Access denied! Click the camera icon in your address bar and reset permissions, then refresh the page.';
+                } else if (err.name === 'NotFoundError') {
+                    errorMsg = 'No camera device found. Please connect a webcam.';
+                } else if (err.name === 'NotReadableError') {
+                    errorMsg = 'Camera is currently in use by another app!';
+                }
 
-                statusEl.innerHTML = `<span style="color: #ff4444">Error: ${err.name} - ${errorMsg}</span>`;
+                statusEl.innerHTML = `<span style="color: #ff4444; font-weight: bold;">Error: ${err.name}</span><br><small style="color: #fff;">${errorMsg}</small>`;
                 startBtn.style.display = 'block';
+                startBtn.textContent = 'Retry Camera Access';
             }
         }
 
