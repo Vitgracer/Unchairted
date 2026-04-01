@@ -16,9 +16,31 @@ export function updateFPS(element, frameCount, lastUpdateTime, now) {
 }
 
 export function hideElement(element) {
-    element.style.display = 'none';
+    element.classList.add('hidden');
 }
 
 export function showElement(element, display = 'block') {
-    element.style.display = display;
+    element.classList.remove('hidden');
+    if (display !== 'block') {
+        element.style.display = display;
+    }
+}
+
+export async function runCountdown(element) {
+    showElement(element);
+    const steps = ['3', '2', '1', 'GO!'];
+    
+    for (const step of steps) {
+        element.textContent = step;
+        element.classList.remove('countdown-animate');
+        void element.offsetWidth; // Trigger reflow
+        element.classList.add('countdown-animate');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+    
+    hideElement(element);
+}
+
+export function updateScore(element, score) {
+    element.textContent = score;
 }

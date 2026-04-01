@@ -1,7 +1,8 @@
 import { initCamera, handleResize } from './camera.js';
 import { initPose, processFrame } from './pose.js';
 import { drawPose } from './renderer.js';
-import { setStatus, updateFPS, hideElement } from './ui.js';
+import { setStatus, updateFPS, hideElement, showElement, runCountdown, updateScore } from './ui.js';
+import { GameplayManager } from './gameplay.js';
 
 const video = document.getElementById('input-video');
 const canvas = document.getElementById('output-canvas');
@@ -12,9 +13,14 @@ const startBtn = document.getElementById('start-btn');
 const statusEl = document.getElementById('status');
 const renderFpsEl = document.getElementById('render-fps');
 const poseFpsEl = document.getElementById('pose-fps');
+const countdownEl = document.getElementById('countdown');
+const scoreContainerEl = document.getElementById('score-container');
+const scoreValEl = document.getElementById('score-val');
 
+const game = new GameplayManager();
 let pose;
 let isStarted = false;
+let currentPoseResults = null;
 
 // FPS tracking
 let renderFrameCount = 0;
@@ -24,6 +30,7 @@ let poseFrameCount = 0;
 let lastPoseFpsUpdate = 0;
 
 function onPoseResults(results) {
+    currentPoseResults = results;
     const now = performance.now();
     
     // Pose FPS
@@ -35,13 +42,51 @@ function onPoseResults(results) {
     }
     lastPoseTime = now;
 
-    // Drawing
-    drawPose(ctx, results, video, canvas);
+    // Handle gameplay updates
+    if (game.gameStarted && results.poseLandmarks) {
+        // Prepare hand points for collision
+        const lms = results.poseLandmarks;
+        const vWidth = video.videoWidth;
+        const vHeight = video.videoHeight;
+        const minDim = Math.min(vWidth, vHeight);
+        const sx = (vWidth - minDim) / 2;
+        const sy = (vHeight - minDim) / 2;
+
+        const mapLM = (lm) => ({
+            x: (lm.x * minDim + sx) / vWidth * canvas.width,
+            y: (lm.y * minDim + sy) / vHeight * canvas.height
+        });
+
+        // Simplified hand center calculation (same as renderer)
+        const getHandCenter = (indices) => {
+            let x = 0, y = 0, count = 0;
+            indices.forEach(idx => {
+                if (lms[idx]) {
+                    x += lms[idx].x;
+                    y += lms[idx].y;
+                    count++;
+                }
+            });
+            return count > 0 ? mapLM({ x: x / count, y: y / count }) : null;
+        };
+
+        const handPoints = [
+            getHandCenter([15, 17, 19, 21]), // Left
+            getHandCenter([16, 18, 20, 22])  // Right
+        ].filter(p => p !== null);
+
+        const playArea = {
+            minX: sx,
+            maxX: sx + minDim
+        };
+
+        game.update(canvas.width, canvas.height, handPoints, playArea);
+        updateScore(scoreValEl, game.getScore());
+    }
 }
 
 async function loop() {
     if (!isStarted) return;
-    
     await processFrame(video, pose, hiddenCanvas, hiddenCtx);
     requestAnimationFrame(loop);
 }
@@ -52,6 +97,9 @@ function renderLoop(now) {
         const updated = updateFPS(renderFpsEl, renderFrameCount, lastRenderFpsUpdate, now);
         renderFrameCount = updated.frameCount;
         lastRenderFpsUpdate = updated.lastUpdateTime;
+
+        // Draw everything
+        drawPose(ctx, currentPoseResults || {}, video, canvas, game);
     }
     requestAnimationFrame(renderLoop);
 }
@@ -71,7 +119,15 @@ async function start() {
         pose = await initPose(onPoseResults);
 
         isStarted = true;
-        setStatus(statusEl, 'Works well :)');
+        setStatus(statusEl, 'Preparation...');
+
+        // Start Countdown
+        await runCountdown(countdownEl);
+        
+        // Start Game
+        showElement(scoreContainerEl);
+        game.start();
+        setStatus(statusEl, 'Enjoy! :)');
 
         loop();
     } catch (err) {

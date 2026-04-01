@@ -1,5 +1,5 @@
 /**
- * Handles custom drawing of landmarks and skeleton.
+ * Handles custom drawing of landmarks, skeleton, and gameplay elements.
  */
 
 function getCenterOfMass(landmarks, indices) {
@@ -35,10 +35,42 @@ function drawPoint(ctx, p, color = '#FF0000', radius = 6) {
     ctx.fill();
 }
 
-export function drawPose(ctx, results, video, canvas) {
+export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
     ctx.save();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // 1. Draw Gameplay Elements (if active)
+    if (gameplayManager && gameplayManager.gameStarted) {
+        gameplayManager.getBubbles().forEach(bubble => {
+            ctx.beginPath();
+            ctx.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
+            
+            if (bubble.isPopped) {
+                // Expanding bubble or particles
+                ctx.strokeStyle = bubble.color;
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.stroke();
+            } else {
+                const gradient = ctx.createRadialGradient(
+                    bubble.x - bubble.radius / 3, 
+                    bubble.y - bubble.radius / 3, 
+                    bubble.radius / 10,
+                    bubble.x, 
+                    bubble.y, 
+                    bubble.radius
+                );
+                gradient.addColorStop(0, 'white');
+                gradient.addColorStop(0.2, bubble.color);
+                gradient.addColorStop(1, 'rgba(0,0,0,0)');
+                
+                ctx.fillStyle = gradient;
+                ctx.fill();
+            }
+        });
+    }
+
+    // 2. Draw Skeleton
     if (results.poseLandmarks) {
         const vWidth = video.videoWidth;
         const vHeight = video.videoHeight;
@@ -54,17 +86,15 @@ export function drawPose(ctx, results, video, canvas) {
 
         const lms = results.poseLandmarks;
         
-        // 1. Calculate simplified points
+        // Calculate points
         const head = mapLM(lms[0]); // Nose
         
-        // Center of mass for hands (Wrist, Pinky, Index, Thumb)
         const leftHandArr = getCenterOfMass(lms, [15, 17, 19, 21]);
         const rightHandArr = getCenterOfMass(lms, [16, 18, 20, 22]);
         
         const leftHand = leftHandArr ? mapLM(leftHandArr) : null;
         const rightHand = rightHandArr ? mapLM(rightHandArr) : null;
 
-        // Basic body points
         const lShoulder = mapLM(lms[11]);
         const rShoulder = mapLM(lms[12]);
         const lElbow = mapLM(lms[13]);
@@ -76,39 +106,30 @@ export function drawPose(ctx, results, video, canvas) {
         const lAnkle = mapLM(lms[27]);
         const rAnkle = mapLM(lms[28]);
 
-        // 2. Draw Skeleton lines
+        // Draw Skeleton lines
         ctx.shadowBlur = 10;
         ctx.shadowColor = '#00FF00';
         
-        // Torso
         drawLine(ctx, lShoulder, rShoulder);
         drawLine(ctx, lShoulder, lHip);
         drawLine(ctx, rShoulder, rHip);
         drawLine(ctx, lHip, rHip);
 
-        // Arms
         drawLine(ctx, lShoulder, lElbow);
         drawLine(ctx, lElbow, leftHand);
         drawLine(ctx, rShoulder, rElbow);
         drawLine(ctx, rElbow, rightHand);
 
-        // Legs
         drawLine(ctx, lHip, lKnee);
         drawLine(ctx, lKnee, lAnkle);
         drawLine(ctx, rHip, rKnee);
         drawLine(ctx, rKnee, rAnkle);
 
-        // 3. Draw key points (joints)
         ctx.shadowColor = '#FF0000';
-        
-        // Head
-        drawPoint(ctx, head, '#00FF00', 10); // Green head point
-        
-        // Hand points
+        drawPoint(ctx, head, '#00FF00', 10);
         drawPoint(ctx, leftHand, '#FF0000', 8);
         drawPoint(ctx, rightHand, '#FF0000', 8);
 
-        // Joints
         [lShoulder, rShoulder, lElbow, rElbow, lHip, rHip, lKnee, rKnee, lAnkle, rAnkle].forEach(p => {
             drawPoint(ctx, p, '#FFFFFF', 4);
         });
