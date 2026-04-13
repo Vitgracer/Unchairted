@@ -35,6 +35,46 @@ class Bubble {
     }
 }
 
+class Laser {
+    constructor(minX, maxX, spawnY) {
+        this.minX = minX;
+        this.maxX = maxX;
+        this.y = spawnY;
+        this.direction = Math.random() > 0.5 ? 1 : -1; // 1: L->R, -1: R->L
+        
+        if (this.direction === 1) {
+            this.x = minX - 250;
+        } else {
+            this.x = maxX + 50;
+        }
+        
+        this.speed = (maxX - minX) * 0.35 * this.direction; 
+        this.active = true;
+        this.width = 200; 
+    }
+
+    update(dt) {
+        this.x += this.speed * dt;
+        if (this.direction === 1 && this.x > this.maxX) {
+            this.active = false;
+        } else if (this.direction === -1 && this.x + this.width < this.minX) {
+            this.active = false;
+        }
+    }
+
+    checkCollision(headPoint) {
+        if (!headPoint || !this.active) return false;
+        // If the laser is horizontally "over" the head area
+        if (this.x < headPoint.x && (this.x + this.width) > headPoint.x) {
+            // Check if head is ABOVE the laser (Y is smaller in screen coords)
+            if (headPoint.y < this.y) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
 export class GameplayManager {
     constructor() {
         this.bubbles = [];
@@ -43,15 +83,23 @@ export class GameplayManager {
         this.spawnInterval = 1500; // spawn every 1.5s
         this.gameStarted = false;
         this.playArea = { minX: 0, maxX: 800 }; // Default
+        this.laser = null;
+        this.lastLaserTime = 0;
+        this.laserInterval = 8000; // Laser every 8s
+        this.isPenaltyActive = false;
+        this.penaltyTimer = 0;
     }
 
     start() {
         this.gameStarted = true;
         this.bubbles = [];
         this.score = 0;
+        this.laser = null;
+        this.lastLaserTime = performance.now();
+        this.isPenaltyActive = false;
     }
 
-    update(canvasWidth, canvasHeight, handPoints, playArea = null, dt) {
+    update(canvasWidth, canvasHeight, handPoints, playArea = null, dt, headPoint = null) {
         if (!this.gameStarted || !dt) return;
         
         if (playArea) {
@@ -74,6 +122,41 @@ export class GameplayManager {
                 }
             });
         });
+
+        // Handle Laser
+
+        if (!this.laser && (now - this.lastLaserTime > this.laserInterval)) {
+            // Adaptive Y: Calculate based on current head position
+            let spawnY = this.playArea.minY + this.playArea.size * 0.5; // Default fallback
+            if (headPoint) {
+                // Spawn 10% of play area size below current head
+                spawnY = headPoint.y + (this.playArea.size * 0.1); 
+                
+                // Keep it within playable bounds
+                const maxY = this.playArea.minY + this.playArea.size - 50;
+                if (spawnY > maxY) spawnY = maxY;
+            }
+
+            this.laser = new Laser(this.playArea.minX, this.playArea.maxX, spawnY);
+            this.lastLaserTime = now;
+        }
+
+        if (this.laser) {
+            this.laser.update(dt);
+            if (headPoint) {
+                if (this.laser.checkCollision(headPoint)) {
+                    this.isPenaltyActive = true;
+                    this.penaltyTimer = 0.3;
+                }
+            }
+            if (!this.laser.active) this.laser = null;
+        }
+
+        // Penalty timer
+        if (this.penaltyTimer > 0) {
+            this.penaltyTimer -= dt;
+            if (this.penaltyTimer <= 0) this.isPenaltyActive = false;
+        }
 
         // Remove bubbles that are off-screen or popped
         const maxY = (this.playArea.minY !== undefined && this.playArea.size !== undefined) 

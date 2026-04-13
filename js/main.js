@@ -22,6 +22,7 @@ let pose;
 let isStarted = false;
 let currentPoseResults = null;
 let handPoints = [];
+let headPoint = null;
 let currentPlayArea = null;
 
 // FPS tracking
@@ -83,9 +84,12 @@ function onPoseResults(results) {
                 getHandCenter([15, 17, 19, 21]), // Left
                 getHandCenter([16, 18, 20, 22])  // Right
             ].filter(p => p !== null);
+
+            headPoint = mapLM(lms[0]); // Nose as head center
         } else {
             // Clear hands if person is not detected
             handPoints = [];
+            headPoint = null;
         }
     }
 }
@@ -113,7 +117,7 @@ function renderLoop(now) {
         
         // Update gameplay logic with delta time
         if (game.gameStarted) {
-            game.update(canvas.width, canvas.height, handPoints, currentPlayArea, deltaTime);
+            game.update(canvas.width, canvas.height, handPoints, currentPlayArea, deltaTime, headPoint);
             updateScore(scoreValEl, game.getScore());
         }
     } else {

@@ -118,13 +118,81 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
     const sx = (vWidth - minDim) / 2;
     const sy = (vHeight - minDim) / 2;
 
+    const lms = results.poseLandmarks;
+    const mapLM = lms ? (lm) => ({
+        x: (lm.x * minDim + sx) / vWidth * canvas.width,
+        y: (lm.y * minDim + sy) / vHeight * canvas.height
+    }) : null;
+
+    const headPoint = (lms && mapLM) ? mapLM(lms[0]) : null;
+
+    // 1. Draw Gameplay Elements (if active)
     if (gameplayManager && gameplayManager.gameStarted) {
-        // Draw the play area boundary
+        // Draw Play Area Boundary
         drawPlayArea(ctx, sx, sy, minDim);
+
+        // Draw Laser (Obstacle)
+        if (gameplayManager.laser) {
+            const laser = gameplayManager.laser;
+            ctx.save();
+            
+            // 1. Draw "Scanline"
+            ctx.strokeStyle = 'rgba(255, 0, 0, 0.15)';
+            ctx.setLineDash([5, 10]);
+            ctx.beginPath();
+            ctx.moveTo(sx, laser.y);
+            ctx.lineTo(sx + minDim, laser.y);
+            ctx.stroke();
+
+            // 2. Head Safety Indicator
+            if (headPoint) {
+                const isUnder = headPoint.y > laser.y;
+                const nearLaser = laser.x < headPoint.x + 100 && (laser.x + laser.width) > headPoint.x - 100;
+
+                ctx.save();
+                ctx.setLineDash([2, 5]);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = isUnder ? 'rgba(0, 255, 0, 0.5)' : 'rgba(255, 0, 0, 0.8)';
+                
+                if (!isUnder && nearLaser) {
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = 'red';
+                    ctx.lineWidth = 4;
+                }
+
+                ctx.beginPath();
+                ctx.moveTo(headPoint.x, headPoint.y);
+                ctx.lineTo(headPoint.x, laser.y);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.arc(headPoint.x, laser.y, 5, 0, Math.PI * 2);
+                ctx.fillStyle = isUnder ? '#00FF00' : '#FF0000';
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // 3. The Laser Beam
+            ctx.shadowBlur = 25;
+            ctx.shadowColor = '#FF0000';
+            const laserGrad = ctx.createLinearGradient(laser.x, laser.y, laser.x + laser.width, laser.y);
+            laserGrad.addColorStop(0, 'rgba(255, 0, 0, 0)');
+            laserGrad.addColorStop(0.2, 'rgba(255, 0, 0, 0.8)');
+            laserGrad.addColorStop(0.5, 'rgba(255, 0, 0, 1)');
+            laserGrad.addColorStop(0.8, 'rgba(255, 0, 0, 0.8)');
+            laserGrad.addColorStop(1, 'rgba(255, 0, 0, 0)');
+            
+            ctx.fillStyle = laserGrad;
+            ctx.fillRect(laser.x, laser.y - 3, laser.width, 6);
+            
+            ctx.shadowBlur = 5;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.fillRect(laser.x + 20, laser.y - 1, laser.width - 40, 2);
+            ctx.restore();
+        }
 
         gameplayManager.getBubbles().forEach(bubble => {
             if (bubble.isPopped) {
-                // Flash explosion
                 ctx.beginPath();
                 ctx.arc(bubble.x, bubble.y, bubble.radius * (1 + bubble.popTimer/5), 0, Math.PI * 2);
                 ctx.strokeStyle = bubble.color;
@@ -144,11 +212,9 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
                 gradient.addColorStop(0, 'white');
                 gradient.addColorStop(0.2, bubble.color);
                 gradient.addColorStop(1, 'rgba(0,0,0,0)');
-                
                 ctx.fillStyle = gradient;
                 ctx.fill();
                 
-                // Add a little highlight
                 ctx.beginPath();
                 ctx.arc(bubble.x - bubble.radius/3, bubble.y - bubble.radius/3, bubble.radius/4, 0, Math.PI*2);
                 ctx.fillStyle = 'rgba(255,255,255,0.4)';
@@ -158,30 +224,12 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
     }
 
     // 2. Draw Skeleton
-    if (results.poseLandmarks) {
-        const vWidth = video.videoWidth;
-        const vHeight = video.videoHeight;
-        const minDim = Math.min(vWidth, vHeight);
-        const sx = (vWidth - minDim) / 2;
-        const sy = (vHeight - minDim) / 2;
-
-        // Map landmarks function
-        const mapLM = (lm) => ({
-            x: (lm.x * minDim + sx) / vWidth * canvas.width,
-            y: (lm.y * minDim + sy) / vHeight * canvas.height
-        });
-
-        const lms = results.poseLandmarks;
-        
-        // Calculate points
-        const head = mapLM(lms[0]); // Nose
-        
+    if (lms && mapLM) {
+        const head = headPoint; 
         const leftHandArr = getCenterOfMass(lms, [15, 17, 19, 21]);
         const rightHandArr = getCenterOfMass(lms, [16, 18, 20, 22]);
-        
         const leftHand = leftHandArr ? mapLM(leftHandArr) : null;
         const rightHand = rightHandArr ? mapLM(rightHandArr) : null;
-
         const lShoulder = mapLM(lms[11]);
         const rShoulder = mapLM(lms[12]);
         const lElbow = mapLM(lms[13]);
@@ -193,20 +241,16 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
         const lAnkle = mapLM(lms[27]);
         const rAnkle = mapLM(lms[28]);
 
-        // Draw Skeleton lines
         ctx.shadowBlur = 10;
         ctx.shadowColor = '#00FF00';
-        
         drawLine(ctx, lShoulder, rShoulder);
         drawLine(ctx, lShoulder, lHip);
         drawLine(ctx, rShoulder, rHip);
         drawLine(ctx, lHip, rHip);
-
         drawLine(ctx, lShoulder, lElbow);
         drawLine(ctx, lElbow, leftHand);
         drawLine(ctx, rShoulder, rElbow);
         drawLine(ctx, rElbow, rightHand);
-
         drawLine(ctx, lHip, lKnee);
         drawLine(ctx, lKnee, lAnkle);
         drawLine(ctx, rHip, rKnee);
@@ -216,10 +260,30 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
         drawPoint(ctx, head, '#00FF00', 10);
         drawPoint(ctx, leftHand, '#FF0000', 8);
         drawPoint(ctx, rightHand, '#FF0000', 8);
-
         [lShoulder, rShoulder, lElbow, rElbow, lHip, rHip, lKnee, rKnee, lAnkle, rAnkle].forEach(p => {
             drawPoint(ctx, p, '#FFFFFF', 4);
         });
     }
+
+    // 3. Penalty Flash Overlay
+    if (gameplayManager && gameplayManager.isPenaltyActive) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.4)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = 'white';
+        ctx.font = '900 80px Outfit, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = 'black';
+        
+        // Mirror un-flip for text (same as play area label)
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.scale(-1, 1);
+        ctx.fillText('DUCK!', 0, 0);
+        ctx.restore();
+    }
+
     ctx.restore();
 }
