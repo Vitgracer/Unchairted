@@ -9,6 +9,7 @@ const canvas = document.getElementById('output-canvas');
 const ctx = canvas.getContext('2d');
 const hiddenCanvas = document.getElementById('hidden-canvas');
 const hiddenCtx = hiddenCanvas.getContext('2d');
+const menuContainer = document.getElementById('menu-container');
 const startBtn = document.getElementById('start-btn');
 const statusEl = document.getElementById('status');
 const renderFpsEl = document.getElementById('render-fps');
@@ -127,7 +128,7 @@ function renderLoop(now) {
 }
 
 async function start() {
-    hideElement(startBtn);
+    hideElement(menuContainer);
     setStatus(statusEl, 'Camera initialization...');
 
     try {
@@ -165,7 +166,7 @@ async function start() {
         }
 
         setStatus(statusEl, `<span style="color: #ff4444; font-weight: bold;">Error: ${err.name}</span><br><small style="color: #fff;">${errorMsg}</small>`, true);
-        startBtn.style.display = 'block';
+        menuContainer.style.display = 'block';
         startBtn.textContent = 'Retry Camera Access';
     }
 }

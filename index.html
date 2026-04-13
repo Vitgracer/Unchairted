@@ -32,7 +32,20 @@
 
 <body>
 
-    <button id="start-btn">Start</button>
+    <div id="menu-container">
+        <h1>Select Game</h1>
+        <div id="game-selection">
+            <button id="start-btn" class="mode-btn">
+                <span class="mode-icon">🧼</span>
+                Bubble Hunter
+            </button>
+            <button id="egg-btn" class="mode-btn disabled">
+                <span class="mode-icon">🥚</span>
+                Egg Catcher
+                <small>(Soon)</small>
+            </button>
+        </div>
+    </div>
 
     <div id="fps-overlay">
         Render FPS: <span id="render-fps" class="fps-val">0</span><br>
