@@ -1,8 +1,8 @@
 ![Visits](https://api.visitorbadge.io/api/VisitorHit?user=Vitgracer&repo=Unchairted&countColor=%237B1E7A)
 ![GitHub last commit](https://img.shields.io/github/last-commit/Vitgracer/Unchairted?color=blue)
-![GitHub repo size](https://img.shields.io/github/repo-size/Vitgracer/Unchairted?color=green)
-![GitHub stars](https://img.shields.io/github/stars/Vitgracer/Unchairted?style=social)
-![GitHub forks](https://img.shields.io/github/forks/Vitgracer/Unchairted?style=social)
+![GitHub repo size](https://img.shields.io/github/repo-size/Vitgracer/Unchairted?color=green?cacheSeconds=0)
+![GitHub stars](https://img.shields.io/github/stars/Vitgracer/Unchairted?style=social?cacheSeconds=0)
+![GitHub forks](https://img.shields.io/github/forks/Vitgracer/Unchairted?style=social?cacheSeconds=0)
 
 
 # ⚡ Unchairted: Get Out of Your Chair
