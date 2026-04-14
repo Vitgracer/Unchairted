@@ -172,22 +172,31 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
                 ctx.restore();
             }
 
-            // 3. The Laser Beam
-            ctx.shadowBlur = 25;
-            ctx.shadowColor = '#FF0000';
-            const laserGrad = ctx.createLinearGradient(laser.x, laser.y, laser.x + laser.width, laser.y);
-            laserGrad.addColorStop(0, 'rgba(255, 0, 0, 0)');
-            laserGrad.addColorStop(0.2, 'rgba(255, 0, 0, 0.8)');
-            laserGrad.addColorStop(0.5, 'rgba(255, 0, 0, 1)');
-            laserGrad.addColorStop(0.8, 'rgba(255, 0, 0, 0.8)');
-            laserGrad.addColorStop(1, 'rgba(255, 0, 0, 0)');
+            // 3. OPTIMIZED LASER (Smooth gradients, no expensive shadows)
+            const time = Date.now();
+            const pulseAlpha = 0.7 + Math.sin(time / 200) * 0.3; // Light pulsing for visibility
             
-            ctx.fillStyle = laserGrad;
-            ctx.fillRect(laser.x, laser.y - 3, laser.width, 6);
+            // --- Outer Glow (Massive Vertical Gradient - very fast) ---
+            const glowHeight = 100; // Increased for maximum visibility on mobile
+            const outerGrad = ctx.createLinearGradient(laser.x, laser.y - glowHeight/2, laser.x, laser.y + glowHeight/2);
+            outerGrad.addColorStop(0, 'rgba(255, 0, 0, 0)');
+            outerGrad.addColorStop(0.5, `rgba(255, 0, 0, ${0.3 * pulseAlpha})`);
+            outerGrad.addColorStop(1, 'rgba(255, 0, 0, 0)');
+            ctx.fillStyle = outerGrad;
+            ctx.fillRect(laser.x, laser.y - glowHeight/2, laser.width, glowHeight);
+
+            // --- Main Beam Body (Neon core) ---
+            const beamGrad = ctx.createLinearGradient(laser.x, laser.y - 6, laser.x, laser.y + 6);
+            beamGrad.addColorStop(0, 'rgba(255, 50, 0, 0.4)');
+            beamGrad.addColorStop(0.5, `rgba(255, 0, 0, ${0.9 * pulseAlpha})`);
+            beamGrad.addColorStop(1, 'rgba(255, 50, 0, 0.4)');
+            ctx.fillStyle = beamGrad;
+            ctx.fillRect(laser.x, laser.y - 6, laser.width, 12);
+
+            // --- Razor Core (Extreme heat) ---
+            ctx.fillStyle = `rgba(255, 255, 255, ${0.95 * pulseAlpha})`;
+            ctx.fillRect(laser.x + 10, laser.y - 1, laser.width - 20, 2);
             
-            ctx.shadowBlur = 5;
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-            ctx.fillRect(laser.x + 20, laser.y - 1, laser.width - 40, 2);
             ctx.restore();
         }
 
