@@ -109,7 +109,7 @@ canvas {
 
 #fps-overlay {
     position: fixed;
-    top: 20px;
+    top: 45px;
     left: 20px;
     background: rgba(0, 0, 0, 0.7);
     padding: 10px 15px;
@@ -144,18 +144,14 @@ canvas {
     display: none;
 }
 
+.info-bar,
 footer {
     position: fixed;
-    bottom: 0;
     left: 0;
     width: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
     color: rgba(255, 255, 255, 0.5);
     font-size: 11px;
-    padding: 10px 20px;
+    padding: 6px 20px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -163,6 +159,19 @@ footer {
     z-index: 100;
     font-family: inherit;
     letter-spacing: 0.3px;
+}
+
+.top-bar {
+    top: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+footer {
+    bottom: 0;
+    background: transparent;
 }
 
 .footer-item {
@@ -177,12 +186,14 @@ footer {
     background: rgba(255, 255, 255, 0.15);
 }
 
+.info-bar a,
 footer a {
     color: rgba(255, 255, 255, 0.8);
     text-decoration: none;
     transition: color 0.2s;
 }
 
+.info-bar a:hover,
 footer a:hover {
     color: #00FF00;
     text-decoration: none;
@@ -249,17 +260,25 @@ footer a:hover {
     }
 
     #fps-overlay {
-        top: 10px;
+        top: 35px;
         left: 10px;
         font-size: 10px;
         padding: 5px 8px;
     }
 
+    .info-bar,
     footer {
-        flex-wrap: wrap;
-        gap: 8px 15px;
-        padding: 8px 10px;
+        padding: 4px 10px;
         font-size: 10px;
+        gap: 10px;
+    }
+
+    .top-bar {
+        background: rgba(0, 0, 0, 0.6);
+    }
+
+    footer {
+        background: transparent;
     }
 
     .footer-divider {
