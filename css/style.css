@@ -160,7 +160,7 @@ footer {
     flex-direction: row; /* Single line for desktop */
     justify-content: center;
     align-items: center;
-    gap: 15px;
+    gap: 0; /* No gap needed, we use pipe margins/pseudo-elements */
     z-index: 100;
     font-family: inherit;
     letter-spacing: 0.3px;
@@ -171,20 +171,26 @@ footer {
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    gap: 15px;
-    width: auto; /* Shrink to content on desktop */
+    gap: 0; /* No gap needed, we use pipe margins */
 }
 
-.desktop-only {
-    display: block;
+/* Pipe dividers via CSS */
+.footer-row .footer-item + .footer-item::before {
+    content: '|';
+    margin-left: 10px;
+    margin-right: 2px; /* Compensating for 8px gap of .footer-item */
+    color: rgba(255, 255, 255, 0.2);
+    font-weight: 300;
 }
 
-.footer-divider-dot {
-    width: 3px;
-    height: 3px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
+/* Specific divider for desktop between row groups */
+.footer-row.row-1 + .footer-row.row-2::before {
+    content: '|';
+    margin: 0 10px;
+    color: rgba(255, 255, 255, 0.2);
+    font-weight: 300;
 }
+
 
 .footer-item {
     display: flex;
@@ -278,23 +284,42 @@ footer a:hover {
     }
 
     footer {
-        flex-direction: column; /* Two rows for mobile */
+        flex-direction: column; 
         padding: 5px 10px;
         font-size: 9px;
-        gap: 2px;
+        gap: 4px;
+        align-items: center; /* Center rows back */
+        justify-content: center;
     }
 
     .footer-row {
-        gap: 8px;
+        gap: 0;
         width: 100%;
+        justify-content: center; /* Center items in rows */
+        flex-wrap: wrap; /* Important: let text wrap inside rows */
     }
 
-    .desktop-only {
+    .footer-item {
+        white-space: normal; /* Allow text wrap on mobile */
+        text-align: center;
+        justify-content: center;
+    }
+
+    /* Show subtle pipe dots on mobile too */
+    .footer-row .footer-item + .footer-item::before {
+        display: inline-block;
+        content: '|';
+        margin-left: 6px;
+        margin-right: -2px; /* Compensating for 8px gap */
+        opacity: 0.5;
+    }
+
+    .footer-row.row-1 + .footer-row.row-2::before {
+        display: none; /* Keep rows separate without vertical pipe between them */
+    }
+
+    .hide-mobile {
         display: none;
-    }
-
-    .footer-divider-dot {
-        display: block;
     }
 }
 
