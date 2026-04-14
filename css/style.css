@@ -271,6 +271,7 @@ footer a:hover {
         padding: 4px 10px;
         font-size: 10px;
         gap: 10px;
+        flex-wrap: wrap;
     }
 
     .top-bar {
