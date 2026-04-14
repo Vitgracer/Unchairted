@@ -256,13 +256,17 @@ footer a:hover {
     }
 
     footer {
-        flex-direction: column;
-        gap: 5px;
-        padding: 5px;
-        font-size: 9px;
+        flex-wrap: wrap;
+        gap: 8px 15px;
+        padding: 8px 10px;
+        font-size: 10px;
     }
 
     .footer-divider {
+        display: none;
+    }
+
+    .hide-mobile {
         display: none;
     }
 }
