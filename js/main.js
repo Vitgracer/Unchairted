@@ -2,7 +2,7 @@ import { initCamera, handleResize } from './camera.js';
 import { initPose, processFrame } from './pose.js';
 import { drawPose } from './renderer.js';
 import { setStatus, updateFPS, hideElement, showElement, runCountdown, updateScore } from './ui.js';
-import { GameplayManager } from './gameplay.js';
+import { GameplayManager, GameMode } from './gameplay.js';
 
 const video = document.getElementById('input-video');
 const canvas = document.getElementById('output-canvas');
@@ -11,6 +11,7 @@ const hiddenCanvas = document.getElementById('hidden-canvas');
 const hiddenCtx = hiddenCanvas.getContext('2d');
 const menuContainer = document.getElementById('menu-container');
 const startBtn = document.getElementById('start-btn');
+const eggBtn = document.getElementById('egg-btn');
 const statusEl = document.getElementById('status');
 const renderFpsEl = document.getElementById('render-fps');
 const poseFpsEl = document.getElementById('pose-fps');
@@ -25,20 +26,15 @@ let currentPoseResults = null;
 let handPoints = [];
 let headPoint = null;
 let currentPlayArea = null;
+let selectedMode = GameMode.BUBBLE;
 
-// FPS tracking
-let renderFrameCount = 0;
-let lastRenderFpsUpdate = 0;
-let lastPoseTime = 0;
-let poseFrameCount = 0;
-let lastPoseFpsUpdate = 0;
-let lastFrameTime = 0;
+// ... (onPoseResults, loop, renderLoop stay largely the same)
 
 function onPoseResults(results) {
     currentPoseResults = results;
     const now = performance.now();
     
-    // Pose FPS
+    // Pose FPS tracking
     if (lastPoseTime > 0) {
         poseFrameCount++;
         const updated = updateFPS(poseFpsEl, poseFrameCount, lastPoseFpsUpdate, now);
@@ -88,7 +84,6 @@ function onPoseResults(results) {
 
             headPoint = mapLM(lms[0]); // Nose as head center
         } else {
-            // Clear hands if person is not detected
             handPoints = [];
             headPoint = null;
         }
@@ -108,15 +103,12 @@ function renderLoop(now) {
         renderFrameCount = updated.frameCount;
         lastRenderFpsUpdate = updated.lastUpdateTime;
 
-        // Calculate Delta Time (in seconds)
         let deltaTime = lastFrameTime ? (now - lastFrameTime) / 1000 : 0;
-        if (deltaTime > 0.1) deltaTime = 0.1; // Cap to 10fps to prevent teleportation after pauses
+        if (deltaTime > 0.1) deltaTime = 0.1;
         lastFrameTime = now;
 
-        // Draw everything
         drawPose(ctx, currentPoseResults || {}, video, canvas, game);
         
-        // Update gameplay logic with delta time
         if (game.gameStarted) {
             game.update(canvas.width, canvas.height, handPoints, currentPlayArea, deltaTime, headPoint);
             updateScore(scoreValEl, game.getScore());
@@ -127,49 +119,49 @@ function renderLoop(now) {
     requestAnimationFrame(renderLoop);
 }
 
-async function start() {
+// FPS tracking vars (moved up)
+let renderFrameCount = 0;
+let lastRenderFpsUpdate = 0;
+let lastPoseTime = 0;
+let poseFrameCount = 0;
+let lastPoseFpsUpdate = 0;
+let lastFrameTime = 0;
+
+async function start(mode) {
+    selectedMode = mode;
     hideElement(menuContainer);
     setStatus(statusEl, 'Camera initialization...');
 
     try {
-        await initCamera(video);
-        
-        const updateSize = () => handleResize(video, canvas);
-        window.addEventListener('resize', updateSize);
-        updateSize();
+        if (!pose) {
+            await initCamera(video);
+            const updateSize = () => handleResize(video, canvas);
+            window.addEventListener('resize', updateSize);
+            updateSize();
 
-        setStatus(statusEl, 'Model is loading..');
-        pose = await initPose(onPoseResults);
+            setStatus(statusEl, 'Model is loading..');
+            pose = await initPose(onPoseResults);
+        }
 
         isStarted = true;
         setStatus(statusEl, 'Preparation...');
 
-        // Start Countdown
         await runCountdown(countdownEl);
         
-        // Start Game
-        hideElement(statusEl); // Hide status during gameplay
+        hideElement(statusEl);
         showElement(scoreContainerEl);
-        game.start();
+        game.start(selectedMode);
 
         loop();
     } catch (err) {
         console.error('Camera Error:', err);
         let errorMsg = err.message;
-        
-        if (err.name === 'NotAllowedError') {
-            errorMsg = 'Access denied! Click the camera icon in your address bar and reset permissions, then refresh the page.';
-        } else if (err.name === 'NotFoundError') {
-            errorMsg = 'No camera device found. Please connect a webcam.';
-        } else if (err.name === 'NotReadableError') {
-            errorMsg = 'Camera is currently in use by another app!';
-        }
-
         setStatus(statusEl, `<span style="color: #ff4444; font-weight: bold;">Error: ${err.name}</span><br><small style="color: #fff;">${errorMsg}</small>`, true);
         menuContainer.style.display = 'block';
-        startBtn.textContent = 'Retry Camera Access';
     }
 }
 
-startBtn.addEventListener('click', start);
+startBtn.addEventListener('click', () => start(GameMode.BUBBLE));
+eggBtn.addEventListener('click', () => start(GameMode.EGG));
 requestAnimationFrame(renderLoop);
+

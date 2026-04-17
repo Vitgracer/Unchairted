@@ -1,3 +1,5 @@
+import { GameMode } from './gameplay.js';
+
 /**
  * Handles custom drawing of landmarks, skeleton, and gameplay elements.
  */
@@ -107,6 +109,74 @@ function drawPlayArea(ctx, x, y, size, color = '#00f2ff') {
     ctx.restore();
 }
 
+function drawEgg(ctx, egg) {
+    ctx.save();
+    ctx.translate(egg.x, egg.y);
+    ctx.rotate(egg.rotation);
+    
+    // Egg shape
+    ctx.beginPath();
+    ctx.ellipse(0, 0, egg.radius * 0.8, egg.radius, 0, 0, Math.PI * 2);
+    
+    // Gradient for 3D look
+    const grad = ctx.createRadialGradient(-egg.radius * 0.3, -egg.radius * 0.3, 2, 0, 0, egg.radius);
+    grad.addColorStop(0, '#ffffff');
+    grad.addColorStop(1, '#e0e0e0');
+    
+    ctx.fillStyle = grad;
+    ctx.fill();
+    
+    // Subtle outline
+    ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    
+    ctx.restore();
+}
+
+function drawBasket(ctx, basket) {
+    if (!basket) return;
+    ctx.save();
+    
+    // Glow
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = '#ffcc00';
+    
+    ctx.translate(basket.x, basket.y);
+    
+    // Basket shape (trapezoid)
+    ctx.beginPath();
+    ctx.moveTo(-basket.width / 2, -basket.height / 2);
+    ctx.lineTo(basket.width / 2, -basket.height / 2);
+    ctx.lineTo(basket.width / 2 - 10, basket.height / 2);
+    ctx.lineTo(-basket.width / 2 + 10, basket.height / 2);
+    ctx.closePath();
+    
+    const grad = ctx.createLinearGradient(0, -basket.height / 2, 0, basket.height / 2);
+    grad.addColorStop(0, '#ffcc00');
+    grad.addColorStop(1, '#ff9900');
+    
+    ctx.fillStyle = grad;
+    ctx.fill();
+    
+    // Edge
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    
+    // Woven pattern (simple lines)
+    ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+    ctx.lineWidth = 1;
+    for(let i = -basket.width/2 + 15; i < basket.width/2 - 10; i += 15) {
+        ctx.beginPath();
+        ctx.moveTo(i, -basket.height/2);
+        ctx.lineTo(i + 5, basket.height/2);
+        ctx.stroke();
+    }
+    
+    ctx.restore();
+}
+
 export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
     ctx.save();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -200,29 +270,34 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
             ctx.restore();
         }
 
-        gameplayManager.getBubbles().forEach(bubble => {
-            if (bubble.isPopped) {
-                ctx.beginPath();
-                ctx.arc(bubble.x, bubble.y, bubble.radius * (1 + bubble.popTimer/10), 0, Math.PI * 2);
-                ctx.strokeStyle = bubble.color;
-                ctx.globalAlpha = 1 - bubble.popTimer/10;
-                ctx.lineWidth = 1;
-                ctx.stroke();
-            } else {
-                ctx.save();
-                const grad = ctx.createRadialGradient(bubble.x, bubble.y, 0, bubble.x, bubble.y, bubble.radius);
-                grad.addColorStop(0, bubble.color);
-                grad.addColorStop(0.8, bubble.color);
-                grad.addColorStop(1, 'rgba(255,255,255,0)');
-                
-                ctx.globalAlpha = 0.7;
-                ctx.fillStyle = grad;
-                ctx.beginPath();
-                ctx.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
-            }
-        });
+        if (gameplayManager.mode === GameMode.BUBBLE) {
+            gameplayManager.getBubbles().forEach(bubble => {
+                if (bubble.isPopped) {
+                    ctx.beginPath();
+                    ctx.arc(bubble.x, bubble.y, bubble.radius * (1 + bubble.popTimer/10), 0, Math.PI * 2);
+                    ctx.strokeStyle = bubble.color;
+                    ctx.globalAlpha = 1 - bubble.popTimer/10;
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                } else {
+                    ctx.save();
+                    const grad = ctx.createRadialGradient(bubble.x, bubble.y, 0, bubble.x, bubble.y, bubble.radius);
+                    grad.addColorStop(0, bubble.color);
+                    grad.addColorStop(0.8, bubble.color);
+                    grad.addColorStop(1, 'rgba(255,255,255,0)');
+                    
+                    ctx.globalAlpha = 0.7;
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            });
+        } else if (gameplayManager.mode === GameMode.EGG) {
+            gameplayManager.getEggs().forEach(egg => drawEgg(ctx, egg));
+            drawBasket(ctx, gameplayManager.getBasket());
+        }
     }
 
     // 2. Draw Skeleton
