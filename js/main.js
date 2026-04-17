@@ -97,6 +97,22 @@ async function loop() {
 }
 
 function renderLoop(now) {
+    // 1. Always update play area if video is ready, to keep game & renderer in sync
+    const vWidth = video.videoWidth;
+    const vHeight = video.videoHeight;
+    if (vWidth > 0 && vHeight > 0) {
+        const minDim = Math.min(vWidth, vHeight);
+        const sx = (vWidth - minDim) / 2;
+        const sy = (vHeight - minDim) / 2;
+
+        currentPlayArea = {
+            minX: sx,
+            maxX: sx + minDim,
+            minY: sy,
+            size: minDim
+        };
+    }
+
     if (isStarted) {
         renderFrameCount++;
         const updated = updateFPS(renderFpsEl, renderFrameCount, lastRenderFpsUpdate, now);
@@ -107,12 +123,12 @@ function renderLoop(now) {
         if (deltaTime > 0.1) deltaTime = 0.1;
         lastFrameTime = now;
 
-        drawPose(ctx, currentPoseResults || {}, video, canvas, game);
-        
         if (game.gameStarted) {
             game.update(canvas.width, canvas.height, handPoints, currentPlayArea, deltaTime, headPoint);
             updateScore(scoreValEl, game.getScore());
         }
+
+        drawPose(ctx, currentPoseResults || {}, video, canvas, game);
     } else {
         lastFrameTime = 0;
     }

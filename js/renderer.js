@@ -109,27 +109,108 @@ function drawPlayArea(ctx, x, y, size, color = '#00f2ff') {
     ctx.restore();
 }
 
+function drawPerches(ctx, perches, basket = null) {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.lineWidth = 14;
+    ctx.lineCap = 'round';
+    
+    perches.forEach(p => {
+        // 1. Draw Perch Pipe
+        ctx.beginPath();
+        ctx.moveTo(p.x1, p.y1);
+        ctx.lineTo(p.x2, p.y2);
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+        ctx.lineWidth = 3;
+        ctx.moveTo(p.x1, p.y1);
+        ctx.lineTo(p.x2, p.y2);
+        ctx.stroke();
+        
+        // Reset for next pipes
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.lineWidth = 14;
+
+        // 2. Draw Catch Zone Target (Phantom Basket)
+        ctx.save();
+        const isNear = basket && Math.sqrt((p.x2 - basket.x)**2 + (p.y2 - basket.y)**2) < 70;
+        
+        ctx.translate(p.x2, p.y2);
+        
+        // Target glow
+        if (isNear) {
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = '#00f2ff';
+            ctx.strokeStyle = 'rgba(0, 242, 255, 0.8)';
+            ctx.lineWidth = 3;
+        } else {
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.lineWidth = 2;
+        }
+
+        // Draw a dashed target circle/bracket
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.arc(0, 0, 35, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Small inner icon
+        ctx.setLineDash([]);
+        ctx.globalAlpha = isNear ? 0.6 : 0.2;
+        ctx.fillStyle = isNear ? '#00f2ff' : '#ffffff';
+        ctx.beginPath();
+        ctx.arc(0, 0, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+    });
+    ctx.restore();
+}
+
 function drawEgg(ctx, egg) {
     ctx.save();
     ctx.translate(egg.x, egg.y);
-    ctx.rotate(egg.rotation);
     
-    // Egg shape
-    ctx.beginPath();
-    ctx.ellipse(0, 0, egg.radius * 0.8, egg.radius, 0, 0, Math.PI * 2);
-    
-    // Gradient for 3D look
-    const grad = ctx.createRadialGradient(-egg.radius * 0.3, -egg.radius * 0.3, 2, 0, 0, egg.radius);
-    grad.addColorStop(0, '#ffffff');
-    grad.addColorStop(1, '#e0e0e0');
-    
-    ctx.fillStyle = grad;
-    ctx.fill();
-    
-    // Subtle outline
-    ctx.strokeStyle = 'rgba(0,0,0,0.1)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
+    if (egg.isBreaking) {
+        // Draw broken egg (yolk splash)
+        const alpha = 1 - (egg.breakTimer / 0.6);
+        ctx.globalAlpha = alpha;
+        
+        // Center yolk
+        ctx.beginPath();
+        ctx.arc(0, 5, egg.radius * 0.8, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffcc00';
+        ctx.fill();
+        
+        // White splashes
+        ctx.fillStyle = '#ffffff';
+        for(let i=0; i<6; i++) {
+            const angle = (i/6) * Math.PI * 2;
+            const dist = egg.radius * 1.2;
+            ctx.beginPath();
+            ctx.arc(Math.cos(angle)*dist, Math.sin(angle)*dist + 5, egg.radius*0.4, 0, Math.PI*2);
+            ctx.fill();
+        }
+    } else {
+        ctx.rotate(egg.rotation);
+        // Egg shape
+        ctx.beginPath();
+        ctx.ellipse(0, 0, egg.radius * 0.8, egg.radius, 0, 0, Math.PI * 2);
+        
+        // Gradient for 3D look
+        const grad = ctx.createRadialGradient(-egg.radius * 0.3, -egg.radius * 0.3, 2, 0, 0, egg.radius);
+        grad.addColorStop(0, '#ffffff');
+        grad.addColorStop(1, '#e0e0e0');
+        
+        ctx.fillStyle = grad;
+        ctx.fill();
+        
+        ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+    }
     
     ctx.restore();
 }
@@ -295,6 +376,7 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
                 }
             });
         } else if (gameplayManager.mode === GameMode.EGG) {
+            drawPerches(ctx, gameplayManager.getPerches(), gameplayManager.getBasket());
             gameplayManager.getEggs().forEach(egg => drawEgg(ctx, egg));
             drawBasket(ctx, gameplayManager.getBasket());
         }

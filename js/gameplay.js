@@ -37,52 +37,72 @@ class Bubble {
 
 class Egg {
     constructor(playArea) {
-        const side = Math.random() > 0.5 ? 'left' : 'right';
-        this.radius = 15;
-        this.side = side;
         this.playArea = playArea;
-        
-        // Spawn at randomized height within play area
-        const verticalRange = playArea.size * 0.7;
-        this.y = playArea.minY + (playArea.size * 0.1) + Math.random() * verticalRange;
-        
-        if (side === 'left') {
-            this.x = playArea.minX - 20;
-            this.speedX = playArea.size * (0.2 + Math.random() * 0.2);
-        } else {
-            this.x = playArea.maxX + 20;
-            this.speedX = -playArea.size * (0.2 + Math.random() * 0.2);
-        }
-        
-        this.speedY = 30 + Math.random() * 40; // Slight fall
+        this.radius = 18;
         this.isCaught = false;
         this.isMissed = false;
-        this.rotation = Math.random() * Math.PI * 2;
-        this.rotSpeed = (Math.random() - 0.5) * 5;
+        this.isBreaking = false;
+        this.breakTimer = 0;
+        this.rotation = 0;
+        this.rotSpeed = 6 + Math.random() * 4;
+
+        // Choose perch: 0:TL, 1:BL, 2:TR, 3:BR
+        this.perchIndex = Math.floor(Math.random() * 4);
+        this.progress = 0; // 0 to 1 (rolling)
+        this.rollSpeed = 0.2 + (Math.random() * 0.15); 
+        
+        this.updatePosition();
+    }
+
+    updatePosition() {
+        const { minX, maxX, minY, size } = this.playArea;
+        const perchWidth = size * 0.3;
+        
+        // Final catch points (ends of perches)
+        const perches = [
+            { x1: minX, y1: minY + size*0.05, x2: minX + perchWidth, y2: minY + size*0.25 }, // TL (Extremely High)
+            { x1: minX, y1: minY + size*0.55, x2: minX + perchWidth, y2: minY + size*0.85 }, // BL (Extremely Low)
+            { x1: maxX, y1: minY + size*0.05, x2: maxX - perchWidth, y2: minY + size*0.25 }, // TR (Extremely High)
+            { x1: maxX, y1: minY + size*0.55, x2: maxX - perchWidth, y2: minY + size*0.85 }  // BR (Extremely Low)
+        ];
+
+        const p = perches[this.perchIndex];
+        this.x = p.x1 + (p.x2 - p.x1) * this.progress;
+        this.y = p.y1 + (p.y2 - p.y1) * this.progress;
     }
 
     update(dt) {
-        if (this.isCaught) return;
-        this.x += this.speedX * dt;
-        this.y += this.speedY * dt;
-        this.rotation += this.rotSpeed * dt;
+        if (this.isCaught || this.isMissed) return;
 
-        // Check missed
-        if (this.x < this.playArea.minX - 100 || this.x > this.playArea.maxX + 100 || this.y > this.playArea.minY + this.playArea.size + 50) {
-            this.isMissed = true;
+        if (this.isBreaking) {
+            this.breakTimer += dt;
+            if (this.breakTimer > 0.6) this.isMissed = true;
+            return;
+        }
+
+        this.progress += this.rollSpeed * dt;
+        this.rotation += this.rotSpeed * dt;
+        
+        if (this.progress >= 1) {
+            this.progress = 1;
+            // Point of no return - if not caught now, it breaks
+            this.updatePosition();
+            this.isBreaking = true;
+        } else {
+            this.updatePosition();
         }
     }
 
     checkCollision(basket) {
-        if (!basket || this.isCaught || this.isMissed) return false;
+        if (!basket || this.isCaught || this.isMissed || this.isBreaking) return false;
         
-        // Simple AABB for basket
-        if (this.x > basket.x - basket.width/2 && 
-            this.x < basket.x + basket.width/2 && 
-            this.y > basket.y - basket.height/2 && 
-            this.y < basket.y + basket.height/2) {
-            this.isCaught = true;
-            return true;
+        // We only allow catching near the end of the perch (progress > 0.85)
+        if (this.progress > 0.85) {
+            const dist = Math.sqrt((this.x - basket.x)**2 + (this.y - basket.y)**2);
+            if (dist < (this.radius + basket.width/2)) {
+                this.isCaught = true;
+                return true;
+            }
         }
         return false;
     }
@@ -200,12 +220,28 @@ export class GameplayManager {
         if (now - this.lastSpawnTime > this.spawnInterval) {
             if (this.mode === GameMode.BUBBLE) {
                 this.bubbles.push(new Bubble(this.playArea.minX, this.playArea.maxX, this.playArea.minY));
+                this.lastSpawnTime = now;
             } else {
-                this.eggs.push(new Egg(this.playArea));
-                // Gradually increase difficulty
-                if (this.spawnInterval > 800) this.spawnInterval -= 50;
+                // EGG Mode: Smarter spawning to avoid simultaneous falls
+                const newEgg = new Egg(this.playArea);
+                const arrivalFor = (egg) => ((1 - egg.progress) / egg.rollSpeed) * 1000;
+                const myArrival = arrivalFor(newEgg);
+                const minConflictDist = 700; 
+
+                let conflict = false;
+                this.eggs.forEach(egg => {
+                    const otherArrival = arrivalFor(egg);
+                    if (Math.abs(myArrival - otherArrival) < minConflictDist) {
+                        conflict = true;
+                    }
+                });
+
+                if (!conflict) {
+                    this.eggs.push(newEgg);
+                    this.lastSpawnTime = now;
+                    if (this.spawnInterval > 700) this.spawnInterval -= 35;
+                }
             }
-            this.lastSpawnTime = now;
         }
 
         // 3. Update Elements
@@ -266,6 +302,17 @@ export class GameplayManager {
             this.penaltyTimer -= dt;
             if (this.penaltyTimer <= 0) this.isPenaltyActive = false;
         }
+    }
+
+    getPerches() {
+        const { minX, maxX, minY, size } = this.playArea;
+        const perchWidth = size * 0.3;
+        return [
+            { x1: minX, y1: minY + size*0.05, x2: minX + perchWidth, y2: minY + size*0.25, label: 'TL' },
+            { x1: minX, y1: minY + size*0.55, x2: minX + perchWidth, y2: minY + size*0.85, label: 'BL' },
+            { x1: maxX, y1: minY + size*0.05, x2: maxX - perchWidth, y2: minY + size*0.25, label: 'TR' },
+            { x1: maxX, y1: minY + size*0.55, x2: maxX - perchWidth, y2: minY + size*0.85, label: 'BR' }
+        ];
     }
 
     getScore() { return this.score; }
