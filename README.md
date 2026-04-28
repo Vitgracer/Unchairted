@@ -6,7 +6,7 @@
 
 
 # ⚡ Unchairted: Get Out of Your Chair
-![Unchairted Banner](assets/logo_cut.jpg)
+![Unchairted Banner](assets/logo_cut.png)
 
 **Stop sitting all day!** Unchairted helps you stay active at your desk. It uses your webcam to track your moves and make office breaks fun.
 
