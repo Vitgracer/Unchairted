@@ -76,15 +76,38 @@
                 </div>
             </div>
         </div>
+        <div id="status">System Standby</div>
+
+        <footer>
+            <div class="footer-row row-1">
+                <div class="footer-item">
+                    <span style="color: rgba(255,255,255,0.7)">🔒 Privacy:</span>
+                    <span> Processing is local. No tracking/cookies.</span>
+                </div>
+                <div class="footer-item">
+                    <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank">
+                        Apache 2.0<span class="hide-mobile"> License</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="footer-row secondary-info row-2">
+                <div class="footer-item">
+                    <span>Copyright© Vitalii • Unchairted 2026</span>
+                </div>
+                <div class="footer-item">
+                    <img src="https://api.visitorbadge.io/api/VisitorHit?user=chairy&repo=mairy&countColor=%237B1E7A"
+                        alt="Visitors" class="badge-img">
+                </div>
+            </div>
+        </footer>
     </main>
 
-    <div id="fps-overlay">
+    <div id="fps-overlay" class="hidden">
         <span>FPS: <span id="render-fps" class="fps-val">0</span></span>
         <span class="divider">/</span>
         <span>POSE: <span id="pose-fps" class="fps-val">0</span></span>
     </div>
-
-    <div id="status">System Standby</div>
 
     <div id="countdown" class="hidden"></div>
 
@@ -92,30 +115,6 @@
         <span class="score-label">SCORE</span>
         <span id="score-val">0000</span>
     </div>
-
-    <footer>
-        <div class="footer-row row-1">
-            <div class="footer-item">
-                <span style="color: rgba(255,255,255,0.7)">🔒 Privacy:</span>
-                <span> Processing is local. No tracking/cookies.</span>
-            </div>
-            <div class="footer-item">
-                <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank">
-                    Apache 2.0<span class="hide-mobile"> License</span>
-                </a>
-            </div>
-        </div>
-
-        <div class="footer-row secondary-info row-2">
-            <div class="footer-item">
-                <span>Copyright© Vitalii • Unchairted 2026</span>
-            </div>
-            <div class="footer-item">
-                <img src="https://api.visitorbadge.io/api/VisitorHit?user=chairy&repo=mairy&countColor=%237B1E7A"
-                    alt="Visitors" class="badge-img">
-            </div>
-        </div>
-    </footer>
 
     <div id="video-container" class="hidden">
         <video id="input-video" playsinline></video>

@@ -20,6 +20,7 @@ const scoreContainerEl = document.getElementById('score-container');
 const scoreValEl = document.getElementById('score-val');
 const mainUiEl = document.getElementById('main-ui');
 const videoContainerEl = document.getElementById('video-container');
+const fpsOverlayEl = document.getElementById('fps-overlay');
 
 const game = new GameplayManager();
 let pose;
@@ -149,6 +150,7 @@ async function start(mode) {
     selectedMode = mode;
     hideElement(mainUiEl);
     showElement(videoContainerEl, 'flex');
+    showElement(fpsOverlayEl);
     videoContainerEl.style.opacity = '1';
     
     setStatus(statusEl, 'SYSTEM INITIALIZING...');
