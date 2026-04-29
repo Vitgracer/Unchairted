@@ -233,6 +233,41 @@ html, body {
 .action-btn:active {
     transform: scale(0.95);
 }
+
+/* Locked & Secret Card Styles */
+.game-card.locked {
+    filter: grayscale(1) opacity(0.5);
+    cursor: not-allowed;
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+}
+
+.game-card.secret {
+    background: rgba(10, 10, 10, 0.9);
+    border: 2px dashed rgba(255, 0, 0, 0.3);
+    opacity: 0.8;
+    filter: none;
+    position: relative;
+}
+
+.game-card.secret .card-content {
+    pointer-events: none;
+}
+
+.game-card.locked:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.game-card.locked::before {
+    display: none;
+}
+
+.action-btn.disabled {
+    background: #222 !important;
+    color: #444 !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+}
 #video-container {
     position: fixed;
     top: 0;
