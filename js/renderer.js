@@ -444,5 +444,34 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
         ctx.restore();
     }
 
+    // 4. Floating Score Effects (TikTok/Stream style)
+    if (gameplayManager && gameplayManager.getEffects()) {
+        gameplayManager.getEffects().forEach(fx => {
+            ctx.save();
+            ctx.globalAlpha = fx.life;
+            
+            // Set font based on type
+            if (fx.type === 'penalty') {
+                ctx.font = `900 ${fx.size}px Syncopate, sans-serif`;
+                ctx.fillStyle = '#ff0055'; // Magenta penalty
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#ff0055';
+            } else {
+                ctx.font = `900 ${fx.size}px Outfit, sans-serif`;
+                ctx.fillStyle = fx.type === 'pos' ? '#00ffcc' : '#ff9900'; // Cyan pos, Orange neg
+                ctx.shadowBlur = 5;
+                ctx.shadowColor = 'rgba(0,0,0,0.5)';
+            }
+            
+            ctx.textAlign = 'center';
+            
+            // Un-mirror for text
+            ctx.translate(fx.x, fx.y);
+            ctx.scale(-1, 1);
+            ctx.fillText(fx.text, 0, 0);
+            ctx.restore();
+        });
+    }
+
     ctx.restore();
 }

@@ -147,6 +147,25 @@ class Laser {
     }
 }
 
+class ScoreEffect {
+    constructor(text, type, x, y) {
+        this.text = text;
+        this.type = type; // 'pos', 'neg', 'penalty'
+        this.x = x;
+        this.y = y;
+        this.life = 1.0; 
+        this.velocity = Math.random() * 100 + 150; // speed up
+        this.drift = (Math.random() - 0.5) * 60; // horizontal wobble
+        this.size = type === 'penalty' ? 28 : 22;
+    }
+
+    update(dt) {
+        this.y -= this.velocity * dt;
+        this.x += this.drift * Math.sin(Date.now() / 200) * dt;
+        this.life -= dt * 0.7; // last ~1.4 seconds
+    }
+}
+
 export class GameplayManager {
     constructor() {
         this.mode = GameMode.BUBBLE;
@@ -163,6 +182,14 @@ export class GameplayManager {
         this.laserInterval = 8000;
         this.isPenaltyActive = false;
         this.penaltyTimer = 0;
+        this.effects = [];
+    }
+
+    addEffect(text, type) {
+        // Spawn on the right side of the play area
+        const x = this.playArea.maxX - 60 - (Math.random() * 40);
+        const y = this.playArea.minY + this.playArea.size - 40;
+        this.effects.push(new ScoreEffect(text, type, x, y));
     }
 
     start(mode = GameMode.BUBBLE) {
@@ -175,6 +202,7 @@ export class GameplayManager {
         this.laser = null;
         this.lastLaserTime = performance.now();
         this.isPenaltyActive = false;
+        this.effects = [];
         
         if (this.mode === GameMode.EGG) {
             this.spawnInterval = 2000; // Slower start for eggs
@@ -252,6 +280,7 @@ export class GameplayManager {
                 handPoints.forEach(point => {
                     if (bubble.checkCollision(point)) {
                         this.score += 10;
+                        this.addEffect('+10', 'pos');
                     }
                 });
             });
@@ -261,6 +290,7 @@ export class GameplayManager {
             this.bubbles.forEach(b => {
                 if (!b.isPopped && !b.isMissed && b.y > maxY) {
                     this.score = Math.max(0, this.score - 10);
+                    this.addEffect('-10', 'neg');
                     b.isMissed = true;
                 }
             });
@@ -272,9 +302,11 @@ export class GameplayManager {
                 egg.update(dt);
                 if (!wasBreaking && egg.isBreaking) {
                     this.score = Math.max(0, this.score - 10);
+                    this.addEffect('-10', 'neg');
                 }
                 if (this.basket && egg.checkCollision(this.basket)) {
                     this.score += 10;
+                    this.addEffect('+10', 'pos');
                 }
             });
             
@@ -300,6 +332,7 @@ export class GameplayManager {
                 if (headPoint && this.laser.checkCollision(headPoint)) {
                     if (!this.isPenaltyActive) {
                         this.score = Math.max(0, this.score - 50);
+                        this.addEffect('-50', 'penalty');
                     }
                     this.isPenaltyActive = true;
                     this.penaltyTimer = 0.3;
@@ -315,6 +348,10 @@ export class GameplayManager {
             this.penaltyTimer -= dt;
             if (this.penaltyTimer <= 0) this.isPenaltyActive = false;
         }
+
+        // Update Effects
+        this.effects.forEach(fx => fx.update(dt));
+        this.effects = this.effects.filter(fx => fx.life > 0);
     }
 
     getPerches() {
@@ -332,5 +369,6 @@ export class GameplayManager {
     getBubbles() { return this.bubbles; }
     getEggs() { return this.eggs; }
     getBasket() { return this.basket; }
+    getEffects() { return this.effects; }
 }
 
