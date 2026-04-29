@@ -11,6 +11,7 @@ class Bubble {
         this.speed = Math.random() * 120 + 60; 
         this.color = `hsl(${Math.random() * 360}, 70%, 60%)`;
         this.isPopped = false;
+        this.isMissed = false;
         this.popTimer = 0;
     }
 
@@ -257,14 +258,23 @@ export class GameplayManager {
             
             // Remove off-screen/popped
             const maxY = this.playArea.minY + this.playArea.size;
+            this.bubbles.forEach(b => {
+                if (!b.isPopped && !b.isMissed && b.y > maxY) {
+                    this.score = Math.max(0, this.score - 10);
+                    b.isMissed = true;
+                }
+            });
             this.bubbles = this.bubbles.filter(b => b.y < maxY + b.radius && (!b.isPopped || b.popTimer < 10));
             
         } else if (this.mode === GameMode.EGG) {
             this.eggs.forEach(egg => {
+                const wasBreaking = egg.isBreaking;
                 egg.update(dt);
+                if (!wasBreaking && egg.isBreaking) {
+                    this.score = Math.max(0, this.score - 10);
+                }
                 if (this.basket && egg.checkCollision(this.basket)) {
-                    this.score += 15;
-                    // Flash effect could be added
+                    this.score += 10;
                 }
             });
             
@@ -288,6 +298,9 @@ export class GameplayManager {
             if (this.laser) {
                 this.laser.update(dt);
                 if (headPoint && this.laser.checkCollision(headPoint)) {
+                    if (!this.isPenaltyActive) {
+                        this.score = Math.max(0, this.score - 50);
+                    }
                     this.isPenaltyActive = true;
                     this.penaltyTimer = 0.3;
                 }

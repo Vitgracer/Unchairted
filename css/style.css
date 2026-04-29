@@ -515,3 +515,24 @@ footer a:hover {
     }
 }
 
+/* Score Highlights for Rules */
+.pts {
+    font-weight: 900;
+    font-family: 'Syncopate', sans-serif;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+}
+.pts-up {
+    color: #00ffcc;
+    text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+}
+.pts-down {
+    color: #ff9900;
+    text-shadow: 0 0 10px rgba(255, 153, 0, 0.5);
+}
+.pts-penalty {
+    color: #ff0055;
+    text-shadow: 0 0 10px rgba(255, 0, 85, 0.5);
+}
