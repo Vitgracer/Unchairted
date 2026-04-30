@@ -217,9 +217,9 @@ export class GameplayManager {
         this.gameStarted = true; // reset() sets it to false, need to set it back if we call it from start
         
         if (this.mode === GameMode.EGG) {
-            this.spawnInterval = 2500; // Slower start
+            this.spawnInterval = 600; // Reduced by ~4x (was 2500)
         } else {
-            this.spawnInterval = 1800;
+            this.spawnInterval = 450; // Reduced by 4x (was 1800)
         }
     }
 
