@@ -23,12 +23,12 @@ class Bubble {
         }
     }
 
-    checkCollision(point) {
+    checkCollision(point, handRadius = 0) {
         if (!point || this.isPopped) return false;
         const dx = this.x - point.x;
         const dy = this.y - point.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < this.radius) {
+        if (distance < (this.radius + handRadius)) {
             this.isPopped = true;
             return true;
         }
@@ -278,7 +278,7 @@ export class GameplayManager {
             this.bubbles.forEach(bubble => {
                 bubble.update(dt);
                 handPoints.forEach(point => {
-                    if (bubble.checkCollision(point)) {
+                    if (bubble.checkCollision(point, 40)) {
                         this.score += 10;
                         this.addEffect('+10', 'pos');
                     }

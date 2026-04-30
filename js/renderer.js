@@ -417,6 +417,28 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
 
         ctx.shadowColor = '#ff0000';
         drawPoint(ctx, head, '#ff0000', 10);
+
+        // Hand Interaction Zones (Bubble Mode) - 40px radius
+        if (gameplayManager && gameplayManager.mode === GameMode.BUBBLE) {
+            [leftHand, rightHand].forEach(hand => {
+                if (hand) {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(hand.x, hand.y, 40, 0, Math.PI * 2);
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                    ctx.setLineDash([5, 5]);
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    
+                    // Optional: subtle glow inside
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+                    ctx.fill();
+                    
+                    ctx.restore();
+                }
+            });
+        }
+
         drawPoint(ctx, leftHand, '#ffffff', 8);
         drawPoint(ctx, rightHand, '#ffffff', 8);
         [lShoulder, rShoulder, lElbow, rElbow, lHip, rHip, lKnee, rKnee, lAnkle, rAnkle].forEach(p => {
