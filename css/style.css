@@ -571,3 +571,128 @@ footer a:hover {
     color: #ff0055;
     text-shadow: 0 0 10px rgba(255, 0, 85, 0.5);
 }
+
+/* Timer Selector Styles */
+.timer-selector-container {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.timer-label {
+    display: block;
+    font-family: 'Syncopate', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--primary-red);
+    margin-bottom: 8px;
+    padding-left: 5px;
+    opacity: 0.9;
+}
+
+.timer-selector {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 6px;
+    border-radius: 14px;
+}
+
+.timer-btn {
+    flex: 1;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-gray);
+    padding: 8px 0;
+    border-radius: 10px;
+    font-family: 'Syncopate', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.timer-btn:hover {
+    color: var(--text-white);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.timer-btn.active {
+    background: var(--primary-red);
+    color: var(--text-white);
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+}
+
+/* On-Game Timer Display */
+#game-timer {
+    position: absolute;
+    top: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    padding: 10px 25px;
+    border-radius: 12px;
+    font-family: 'Syncopate', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-white);
+    border: 1px solid var(--glass-border);
+    letter-spacing: 2px;
+    z-index: 100;
+}
+
+/* Game Over Overlay */
+#game-over {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(10px);
+}
+
+.game-over-content {
+    text-align: center;
+    padding: 40px;
+    border: 2px solid var(--primary-red);
+    border-radius: 30px;
+    background: radial-gradient(circle at center, #1a0000 0%, #000 100%);
+    box-shadow: 0 0 50px rgba(255, 0, 0, 0.2);
+    max-width: 90%;
+    width: 400px;
+}
+
+.glitch-text {
+    font-family: 'Syncopate', sans-serif;
+    font-size: 2.5rem;
+    margin: 0 0 30px 0;
+    color: #fff;
+    text-shadow: 3px 3px var(--primary-red);
+    letter-spacing: 5px;
+}
+
+.final-score-container {
+    margin-bottom: 40px;
+}
+
+.final-score-container .label {
+    display: block;
+    color: var(--text-gray);
+    font-size: 0.8rem;
+    letter-spacing: 4px;
+    margin-bottom: 10px;
+}
+
+#final-score-val {
+    font-size: 4rem;
+    font-weight: 900;
+    color: var(--primary-red);
+    text-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
+}

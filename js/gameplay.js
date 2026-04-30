@@ -183,6 +183,9 @@ export class GameplayManager {
         this.isPenaltyActive = false;
         this.penaltyTimer = 0;
         this.effects = [];
+        this.duration = 60; // default 1 min
+        this.remainingTime = 60;
+        this.difficultyPhase = 0; // 0, 1, 2
     }
 
     addEffect(text, type) {
@@ -192,8 +195,10 @@ export class GameplayManager {
         this.effects.push(new ScoreEffect(text, type, x, y));
     }
 
-    start(mode = GameMode.BUBBLE) {
+    start(mode = GameMode.BUBBLE, duration = 60) {
         this.mode = mode;
+        this.duration = duration;
+        this.remainingTime = duration === 0 ? Infinity : duration;
         this.gameStarted = true;
         this.bubbles = [];
         this.eggs = [];
@@ -205,9 +210,9 @@ export class GameplayManager {
         this.effects = [];
         
         if (this.mode === GameMode.EGG) {
-            this.spawnInterval = 2000; // Slower start for eggs
+            this.spawnInterval = 2500; // Slower start
         } else {
-            this.spawnInterval = 1500;
+            this.spawnInterval = 1800;
         }
     }
 
@@ -219,6 +224,26 @@ export class GameplayManager {
         }
 
         const now = performance.now();
+
+        // Update Timer
+        if (this.duration > 0) {
+            this.remainingTime -= dt;
+            if (this.remainingTime <= 0) {
+                this.remainingTime = 0;
+                this.gameStarted = false;
+                return;
+            }
+
+            // Difficulty scaling (20% easy, 40% medium, 40% hard)
+            const progress = (this.duration - this.remainingTime) / this.duration;
+            if (progress < 0.2) this.difficultyPhase = 0;
+            else if (progress < 0.6) this.difficultyPhase = 1;
+            else this.difficultyPhase = 2;
+        } else {
+            // Infinite mode - scale by time?
+            const elapsed = now - this.lastSpawnTime; // No, just use a slow scale
+            this.difficultyPhase = 1; // Default to medium for infinite
+        }
 
         // 1. Handle Basket Logic (Egg Mode Only)
         if (this.mode === GameMode.EGG) {
@@ -246,16 +271,26 @@ export class GameplayManager {
         }
 
         // 2. Spawn Elements
-        if (now - this.lastSpawnTime > this.spawnInterval) {
+        let currentSpawnInterval = this.spawnInterval;
+        if (this.difficultyPhase === 1) currentSpawnInterval *= 0.7;
+        if (this.difficultyPhase === 2) currentSpawnInterval *= 0.5;
+
+        if (now - this.lastSpawnTime > currentSpawnInterval) {
             if (this.mode === GameMode.BUBBLE) {
-                this.bubbles.push(new Bubble(this.playArea.minX, this.playArea.maxX, this.playArea.minY));
+                const b = new Bubble(this.playArea.minX, this.playArea.maxX, this.playArea.minY);
+                if (this.difficultyPhase === 1) b.speed *= 1.3;
+                if (this.difficultyPhase === 2) b.speed *= 1.6;
+                this.bubbles.push(b);
                 this.lastSpawnTime = now;
             } else {
                 // EGG Mode: Smarter spawning to avoid simultaneous falls
                 const newEgg = new Egg(this.playArea);
+                if (this.difficultyPhase === 1) newEgg.rollSpeed *= 1.25;
+                if (this.difficultyPhase === 2) newEgg.rollSpeed *= 1.5;
+
                 const arrivalFor = (egg) => ((1 - egg.progress) / egg.rollSpeed) * 1000;
                 const myArrival = arrivalFor(newEgg);
-                const minConflictDist = 700; 
+                const minConflictDist = 1400; // DOUBLED DISTANCE (was 700)
 
                 let conflict = false;
                 this.eggs.forEach(egg => {
@@ -268,7 +303,6 @@ export class GameplayManager {
                 if (!conflict) {
                     this.eggs.push(newEgg);
                     this.lastSpawnTime = now;
-                    if (this.spawnInterval > 700) this.spawnInterval -= 35;
                 }
             }
         }

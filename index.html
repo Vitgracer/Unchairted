@@ -60,6 +60,14 @@
                             <li><span class="dot"></span> DUCK! Keep head below laser: <span class="pts pts-penalty">-50
                                     PTS</span></li>
                         </ul>
+                        <div class="timer-selector-container">
+                            <span class="timer-label">DURATION</span>
+                            <div class="timer-selector" data-for="BUBBLE">
+                                <button class="timer-btn active" data-time="60">1 min</button>
+                                <button class="timer-btn" data-time="300">5 min</button>
+                                <button class="timer-btn" data-time="0">∞</button>
+                            </div>
+                        </div>
                         <button id="start-btn" class="mode-btn action-btn" data-mode="BUBBLE">PLAY</button>
                     </div>
                 </div>
@@ -76,6 +84,14 @@
                             <li><span class="dot"></span> If an egg breaks on the floor: <span class="pts pts-down">-10
                                     PTS</span></li>
                         </ul>
+                        <div class="timer-selector-container">
+                            <span class="timer-label">DURATION</span>
+                            <div class="timer-selector" data-for="EGG">
+                                <button class="timer-btn active" data-time="60">1 min</button>
+                                <button class="timer-btn" data-time="300">5 min</button>
+                                <button class="timer-btn" data-time="0">∞</button>
+                            </div>
+                        </div>
                         <button id="egg-btn" class="mode-btn action-btn" data-mode="EGG">PLAY</button>
                     </div>
                 </div>
@@ -138,6 +154,18 @@
     <div id="video-container" class="hidden">
         <video id="input-video" playsinline></video>
         <canvas id="output-canvas"></canvas>
+        <div id="game-timer" class="hidden">01:00</div>
+    </div>
+
+    <div id="game-over" class="hidden">
+        <div class="game-over-content">
+            <h2 class="glitch-text">GAME OVER</h2>
+            <div class="final-score-container">
+                <span class="label">FINAL SCORE</span>
+                <span id="final-score-val">0000</span>
+            </div>
+            <button id="back-to-menu-btn" class="action-btn">BACK TO MENU</button>
+        </div>
     </div>
 
     <!-- Hidden canvas for cropping and resizing -->

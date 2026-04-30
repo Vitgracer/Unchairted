@@ -1,7 +1,7 @@
 import { initCamera, handleResize } from './camera.js';
 import { initPose, processFrame } from './pose.js';
 import { drawPose } from './renderer.js';
-import { setStatus, updateFPS, hideElement, showElement, runCountdown, updateScore } from './ui.js';
+import { setStatus, updateFPS, hideElement, showElement, runCountdown, updateScore, updateTimer, showGameOver } from './ui.js';
 import { GameplayManager, GameMode } from './gameplay.js';
 
 const video = document.getElementById('input-video');
@@ -21,6 +21,10 @@ const scoreValEl = document.getElementById('score-val');
 const mainUiEl = document.getElementById('main-ui');
 const videoContainerEl = document.getElementById('video-container');
 const fpsOverlayEl = document.getElementById('fps-overlay');
+const gameTimerEl = document.getElementById('game-timer');
+const gameOverEl = document.getElementById('game-over');
+const finalScoreEl = document.getElementById('final-score-val');
+const backToMenuBtn = document.getElementById('back-to-menu-btn');
 
 const game = new GameplayManager();
 let pose;
@@ -30,6 +34,8 @@ let handPoints = [];
 let headPoint = null;
 let currentPlayArea = null;
 let selectedMode = GameMode.BUBBLE;
+let selectedDuration = 60; // default 1 min
+let gameOverShown = false;
 
 // ... (onPoseResults, loop, renderLoop stay largely the same)
 
@@ -129,6 +135,11 @@ function renderLoop(now) {
         if (game.gameStarted) {
             game.update(canvas.width, canvas.height, handPoints, currentPlayArea, deltaTime, headPoint);
             updateScore(scoreValEl, game.getScore());
+            updateTimer(gameTimerEl, game.remainingTime);
+        } else if (isStarted && !game.gameStarted && !gameOverShown && game.remainingTime === 0) {
+            // Game just ended
+            gameOverShown = true;
+            showGameOver(gameOverEl, finalScoreEl, game.getScore());
         }
 
         drawPose(ctx, currentPoseResults || {}, video, canvas, game);
@@ -177,7 +188,11 @@ async function start(mode) {
         
         hideElement(statusEl);
         showElement(scoreContainerEl);
-        game.start(selectedMode);
+        if (selectedDuration > 0) showElement(gameTimerEl);
+        else hideElement(gameTimerEl);
+        
+        game.start(selectedMode, selectedDuration);
+        gameOverShown = false;
 
         loop();
     } catch (err) {
@@ -194,6 +209,34 @@ async function start(mode) {
     }
 }
 
+
+// Timer Selection Logic
+document.querySelectorAll('.timer-selector').forEach(selector => {
+    selector.addEventListener('click', (e) => {
+        if (e.target.classList.contains('timer-btn')) {
+            // Remove active from all in this selector
+            selector.querySelectorAll('.timer-btn').forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+            
+            const time = parseInt(e.target.dataset.time);
+            selectedDuration = time;
+        }
+    });
+});
+
+backToMenuBtn.addEventListener('click', () => {
+    hideElement(gameOverEl);
+    hideElement(videoContainerEl);
+    hideElement(scoreContainerEl);
+    hideElement(gameTimerEl);
+    showElement(mainUiEl);
+    showElement(document.getElementById('hero-bg'));
+    showElement(document.getElementById('overlay-glow'));
+    if (document.getElementById('smoke-layer')) showElement(document.getElementById('smoke-layer'));
+    
+    isStarted = false;
+    videoContainerEl.style.opacity = '0';
+});
 
 startBtn.addEventListener('click', () => start(GameMode.BUBBLE));
 eggBtn.addEventListener('click', () => start(GameMode.EGG));

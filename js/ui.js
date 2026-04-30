@@ -44,3 +44,18 @@ export async function runCountdown(element) {
 export function updateScore(element, score) {
     element.textContent = score.toString().padStart(4, '0');
 }
+
+export function updateTimer(element, remainingTime) {
+    if (remainingTime === Infinity) {
+        element.textContent = "∞";
+        return;
+    }
+    const mins = Math.floor(remainingTime / 60);
+    const secs = Math.floor(remainingTime % 60);
+    element.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+export function showGameOver(overlay, scoreVal, finalScore) {
+    scoreVal.textContent = finalScore.toString().padStart(4, '0');
+    overlay.classList.remove('hidden');
+}
