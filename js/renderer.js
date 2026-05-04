@@ -219,42 +219,32 @@ function drawBasket(ctx, basket) {
     if (!basket) return;
     ctx.save();
 
-    // Glow
-    ctx.shadowBlur = 15;
-    ctx.shadowColor = '#ffcc00';
-
     ctx.translate(basket.x, basket.y);
+    
+    // Un-mirror for the emoji/text
+    ctx.save();
+    ctx.scale(-1, 1);
 
-    // Basket shape (trapezoid)
-    ctx.beginPath();
-    ctx.moveTo(-basket.width / 2, -basket.height / 2);
-    ctx.lineTo(basket.width / 2, -basket.height / 2);
-    ctx.lineTo(basket.width / 2 - 10, basket.height / 2);
-    ctx.lineTo(-basket.width / 2 + 10, basket.height / 2);
-    ctx.closePath();
+    const w = basket.width;
+    const h = basket.height;
+    
+    // Draw 🧺 Emoji - increased size
+    ctx.font = `${h * 1.4}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🧺', 0, 0);
 
-    const grad = ctx.createLinearGradient(0, -basket.height / 2, 0, basket.height / 2);
-    grad.addColorStop(0, '#ffcc00');
-    grad.addColorStop(1, '#ff9900');
-
+    // Subtle overlay
+    const grad = ctx.createLinearGradient(0, -h/2, 0, h/2);
+    grad.addColorStop(0, 'rgba(255, 215, 0, 0.1)');
+    grad.addColorStop(1, 'rgba(255, 140, 0, 0.05)');
+    
     ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, w/2, h/2, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Edge
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 3;
-    ctx.stroke();
-
-    // Woven pattern (simple lines)
-    ctx.strokeStyle = 'rgba(0,0,0,0.2)';
-    ctx.lineWidth = 1;
-    for (let i = -basket.width / 2 + 15; i < basket.width / 2 - 10; i += 15) {
-        ctx.beginPath();
-        ctx.moveTo(i, -basket.height / 2);
-        ctx.lineTo(i + 5, basket.height / 2);
-        ctx.stroke();
-    }
-
+    ctx.restore();
     ctx.restore();
 }
 
@@ -402,6 +392,9 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
 
         ctx.shadowBlur = 10;
         ctx.shadowColor = '#ff0000';
+        
+        // --- SKELETON LINES (Commented out for debug) ---
+        /*
         drawLine(ctx, lShoulder, rShoulder);
         drawLine(ctx, lShoulder, lHip);
         drawLine(ctx, rShoulder, rHip);
@@ -414,9 +407,12 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
         drawLine(ctx, lKnee, lAnkle);
         drawLine(ctx, rHip, rKnee);
         drawLine(ctx, rKnee, rAnkle);
+        */
 
-        ctx.shadowColor = '#ff0000';
-        drawPoint(ctx, head, '#ff0000', 10);
+        if (gameplayManager && gameplayManager.mode === GameMode.BUBBLE) {
+            ctx.shadowColor = '#ffffff';
+            drawPoint(ctx, head, '#ffffff', 10); // Center head in white
+        }
 
         // Hand Interaction Zones (Bubble Mode) - 40px radius
         if (gameplayManager && gameplayManager.mode === GameMode.BUBBLE) {
@@ -439,11 +435,19 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
             });
         }
 
-        drawPoint(ctx, leftHand, '#ffffff', 8);
-        drawPoint(ctx, rightHand, '#ffffff', 8);
+        // Draw hand points only if no basket is being drawn
+        const isBasketActive = gameplayManager && gameplayManager.getBasket();
+        if (!isBasketActive) {
+            drawPoint(ctx, leftHand, '#ffffff', 8);
+            drawPoint(ctx, rightHand, '#ffffff', 8);
+        }
+
+        // --- OTHER JOINTS (Commented out for debug) ---
+        /*
         [lShoulder, rShoulder, lElbow, rElbow, lHip, rHip, lKnee, rKnee, lAnkle, rAnkle].forEach(p => {
             drawPoint(ctx, p, '#FFFFFF', 4);
         });
+        */
     }
 
     // 3. Penalty Flash Overlay

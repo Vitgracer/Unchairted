@@ -276,8 +276,8 @@ export class GameplayManager {
                     this.basket = {
                         x: (p1.x + p2.x) / 2,
                         y: (p1.y + p2.y) / 2,
-                        width: 100,
-                        height: 60
+                        width: 140,
+                        height: 90
                     };
                 } else {
                     this.basket = null;
