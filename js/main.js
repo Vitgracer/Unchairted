@@ -12,6 +12,7 @@ const hiddenCtx = hiddenCanvas.getContext('2d');
 const menuContainer = document.getElementById('menu-container');
 const startBtn = document.getElementById('start-btn');
 const eggBtn = document.getElementById('egg-btn');
+const targetBtn = document.getElementById('target-btn');
 const statusEl = document.getElementById('status');
 const renderFpsEl = document.getElementById('render-fps');
 const poseFpsEl = document.getElementById('pose-fps');
@@ -254,5 +255,6 @@ backToMenuBtn.addEventListener('click', () => {
 
 startBtn.addEventListener('click', () => start(GameMode.BUBBLE));
 eggBtn.addEventListener('click', () => start(GameMode.EGG));
+targetBtn.addEventListener('click', () => start(GameMode.DUMMY));
 requestAnimationFrame(renderLoop);
 

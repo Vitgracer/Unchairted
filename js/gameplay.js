@@ -1,6 +1,7 @@
 export const GameMode = {
     BUBBLE: 'BUBBLE',
-    EGG: 'EGG'
+    EGG: 'EGG',
+    DUMMY: 'DUMMY'
 };
 
 class Bubble {
@@ -147,6 +148,70 @@ class Laser {
     }
 }
 
+class Bullet {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.radius = 5;
+        this.speed = 600; // pixels per second
+        this.active = true;
+    }
+
+    update(dt) {
+        this.y -= this.speed * dt; // fire upward
+        }
+
+    checkCollision(dummy) {
+        if (!dummy || !this.active || dummy.isHit) return false;
+        const dx = this.x - dummy.x;
+        const dy = this.y - dummy.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < (this.radius + dummy.hitRadius)) {
+            this.active = false;
+            return true;
+        }
+        return false;
+    }
+}
+
+class Dummy {
+    constructor(playArea) {
+        this.playArea = playArea;
+        this.width = playArea.size * 0.08;
+        this.height = playArea.size * 0.18;
+        this.hitRadius = this.width * 0.6;
+
+        // Spawn position: random X within play area, start from top
+        const margin = this.width;
+        this.x = playArea.minX + margin + Math.random() * (playArea.size - margin * 2);
+        this.y = playArea.minY - this.height;
+
+        // Fall downward with slight horizontal drift
+        this.speed = playArea.size * 0.15 + Math.random() * playArea.size * 0.1;
+        this.drift = (Math.random() - 0.5) * playArea.size * 0.05;
+
+        this.isHit = false;
+        this.fallTimer = 0;
+        this.fallSpeed = playArea.size * 0.8;
+        this.rotation = 0;
+        this.rotSpeed = 0;
+
+        // Visual variety
+        this.color = `hsl(${Math.random() * 60 + 10}, 70%, 45%)`; // warm tones
+    }
+
+    update(dt) {
+        if (!this.isHit) {
+            this.y += this.speed * dt;
+            this.x += this.drift * dt;
+        } else {
+            this.fallTimer += dt;
+            this.y += this.fallSpeed * dt;
+            this.rotation += this.rotSpeed * dt;
+        }
+    }
+}
+
 class ScoreEffect {
     constructor(text, type, x, y) {
         this.text = text;
@@ -186,6 +251,12 @@ export class GameplayManager {
         this.duration = 60; // default 1 min
         this.remainingTime = 60;
         this.difficultyPhase = 0; // 0, 1, 2
+
+        // Dummy mode state
+        this.dummies = [];
+        this.bullets = [];
+        this.lastBulletTime = 0;
+        this.bulletInterval = 120; // fire every 120ms per hand
     }
 
     addEffect(text, type) {
@@ -206,6 +277,8 @@ export class GameplayManager {
         this.effects = [];
         this.gameStarted = false;
         this.remainingTime = this.duration;
+        this.dummies = [];
+        this.bullets = [];
 
         // Statistics
         this.stats = {
@@ -214,7 +287,9 @@ export class GameplayManager {
             eggsCaught: 0,
             eggsBroken: 0,
             lasersAvoided: 0,
-            lasersHit: 0
+            lasersHit: 0,
+            dummiesHit: 0,
+            dummiesMissed: 0
         };
     }
 
@@ -225,9 +300,11 @@ export class GameplayManager {
         this.gameStarted = true;
         this.reset();
         this.gameStarted = true; // reset() sets it to false, need to set it back if we call it from start
-        
+
         if (this.mode === GameMode.EGG) {
             this.spawnInterval = 600; // Reduced by ~4x (was 2500)
+        } else if (this.mode === GameMode.DUMMY) {
+            this.spawnInterval = 1800; // dummies spawn every ~1.8s
         } else {
             this.spawnInterval = 450; // Reduced by 4x (was 1800)
         }
@@ -299,6 +376,12 @@ export class GameplayManager {
                 if (this.difficultyPhase === 2) b.speed *= 1.8;
                 this.bubbles.push(b);
                 this.lastSpawnTime = now;
+            } else if (this.mode === GameMode.DUMMY) {
+                const d = new Dummy(this.playArea);
+                if (this.difficultyPhase === 1) d.speed *= 1.4;
+                if (this.difficultyPhase === 2) d.speed *= 1.8;
+                this.dummies.push(d);
+                this.lastSpawnTime = now;
             } else {
                 // EGG Mode: Smarter spawning to avoid simultaneous falls
                 const newEgg = new Egg(this.playArea);
@@ -368,6 +451,45 @@ export class GameplayManager {
             
             // Remove missed/caught
             this.eggs = this.eggs.filter(egg => !egg.isMissed && !egg.isCaught);
+        } else if (this.mode === GameMode.DUMMY) {
+            // Fire bullets from each hand continuously
+            if (handPoints.length > 0 && now - this.lastBulletTime > this.bulletInterval) {
+                handPoints.forEach(point => {
+                    this.bullets.push(new Bullet(point.x, point.y));
+                });
+                this.lastBulletTime = now;
+            }
+
+            // Update bullets
+            this.bullets.forEach(bullet => bullet.update(dt));
+
+            // Update dummies and check bullet collisions
+            this.dummies.forEach(dummy => {
+                dummy.update(dt);
+                this.bullets.forEach(bullet => {
+                    if (bullet.checkCollision(dummy)) {
+                        dummy.isHit = true;
+                        dummy.rotSpeed = (Math.random() - 0.5) * 10;
+                        this.score += 10;
+                        this.stats.dummiesHit++;
+                        this.addEffect('+10', 'pos');
+                    }
+                });
+            });
+
+            // Remove off-screen dummies that weren't hit
+            const maxY = this.playArea.minY + this.playArea.size;
+            this.dummies.forEach(d => {
+                if (!d.isHit && d.y > maxY) {
+                    this.score = Math.max(0, this.score - 5);
+                    this.stats.dummiesMissed++;
+                    this.addEffect('-5', 'neg');
+                }
+            });
+
+            // Cleanup
+            this.bullets = this.bullets.filter(b => b.active && b.y > this.playArea.minY - 50);
+            this.dummies = this.dummies.filter(d => d.y < maxY + d.height * 2);
         }
 
         // 4. Handle Laser (Disabled in EGG mode as requested)
@@ -430,5 +552,7 @@ export class GameplayManager {
     getEggs() { return this.eggs; }
     getBasket() { return this.basket; }
     getEffects() { return this.effects; }
+    getDummies() { return this.dummies; }
+    getBullets() { return this.bullets; }
 }
 

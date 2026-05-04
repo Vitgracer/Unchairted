@@ -96,17 +96,25 @@
                     </div>
                 </div>
 
-                <!-- Secret Mode (Locked) -->
-                <div class="game-card locked secret" id="card-soon">
+                <!-- Target Range Card -->
+                <div class="game-card" id="card-target">
                     <div class="card-content">
-                        <div class="game-icon">🔒</div>
-                        <h2>SECRET MODE</h2>
+                        <div class="game-icon">🎯</div>
+                        <h2>Target Range</h2>
                         <ul class="game-rules">
-                            <li><span class="dot"></span> Probably GTA 6?</li>
-                            <li><span class="dot"></span> No. 😊</li>
-                            <li><span class="dot"></span> KEEP MOVING TO UNLOCK</li>
+                            <li><span class="dot"></span> Your hands fire bullets automatically</li>
+                            <li><span class="dot"></span> Shoot dummies before they pass: <span class="pts pts-up">+10 PTS</span></li>
+                            <li><span class="dot"></span> Missed dummies escape: <span class="pts pts-down">-5 PTS</span></li>
                         </ul>
-                        <button class="mode-btn action-btn disabled" disabled>COMING SOON</button>
+                        <div class="timer-selector-container">
+                            <span class="timer-label">DURATION</span>
+                            <div class="timer-selector" data-for="DUMMY">
+                                <button class="timer-btn active" data-time="60">1 min</button>
+                                <button class="timer-btn" data-time="300">5 min</button>
+                                <button class="timer-btn" data-time="0">∞</button>
+                            </div>
+                        </div>
+                        <button id="target-btn" class="mode-btn action-btn" data-mode="DUMMY">PLAY</button>
                     </div>
                 </div>
             </div>

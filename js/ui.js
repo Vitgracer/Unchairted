@@ -88,6 +88,17 @@ export function showGameOver(overlay, scoreValEl, finalScore, stats, mode) {
                 <span class="stat-value neg">${stats.lasersHit}</span>
             </div>
         `;
+    } else if (mode === 'DUMMY') {
+        html = `
+            <div class="stat-row">
+                <span class="stat-label">Dummies Hit</span>
+                <span class="stat-value pos">${stats.dummiesHit}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Dummies Missed</span>
+                <span class="stat-value neg">${stats.dummiesMissed}</span>
+            </div>
+        `;
     } else {
         html = `
             <div class="stat-row">

@@ -218,13 +218,13 @@ function drawEgg(ctx, egg) {
 function drawBasket(ctx, basket) {
     if (!basket) return;
     ctx.save();
-    
+
     // Glow
     ctx.shadowBlur = 15;
     ctx.shadowColor = '#ffcc00';
-    
+
     ctx.translate(basket.x, basket.y);
-    
+
     // Basket shape (trapezoid)
     ctx.beginPath();
     ctx.moveTo(-basket.width / 2, -basket.height / 2);
@@ -232,19 +232,19 @@ function drawBasket(ctx, basket) {
     ctx.lineTo(basket.width / 2 - 10, basket.height / 2);
     ctx.lineTo(-basket.width / 2 + 10, basket.height / 2);
     ctx.closePath();
-    
+
     const grad = ctx.createLinearGradient(0, -basket.height / 2, 0, basket.height / 2);
     grad.addColorStop(0, '#ffcc00');
     grad.addColorStop(1, '#ff9900');
-    
+
     ctx.fillStyle = grad;
     ctx.fill();
-    
+
     // Edge
     ctx.strokeStyle = '#fff';
     ctx.lineWidth = 3;
     ctx.stroke();
-    
+
     // Woven pattern (simple lines)
     ctx.strokeStyle = 'rgba(0,0,0,0.2)';
     ctx.lineWidth = 1;
@@ -254,7 +254,58 @@ function drawBasket(ctx, basket) {
         ctx.lineTo(i + 5, basket.height/2);
         ctx.stroke();
     }
-    
+
+    ctx.restore();
+}
+
+function drawDummy(ctx, dummy) {
+    ctx.save();
+    ctx.translate(dummy.x, dummy.y);
+    if (dummy.isHit) ctx.rotate(dummy.rotation);
+
+    const w = dummy.width;
+    const h = dummy.height;
+
+    // Body
+    ctx.fillStyle = dummy.color;
+    ctx.fillRect(-w/2, -h/2, w, h * 0.6);
+
+    // Head
+    ctx.beginPath();
+    ctx.arc(0, -h/2 - w * 0.4, w * 0.4, 0, Math.PI * 2);
+    ctx.fillStyle = '#f5d0a9'; // skin tone
+    ctx.fill();
+
+    // Eyes
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    ctx.arc(-w * 0.12, -h/2 - w * 0.45, 2, 0, Math.PI * 2);
+    ctx.arc(w * 0.12, -h/2 - w * 0.45, 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Legs
+    ctx.fillStyle = '#333';
+    ctx.fillRect(-w/2, h * 0.1, w * 0.35, h * 0.4);
+    ctx.fillRect(w/2 - w * 0.35, h * 0.1, w * 0.35, h * 0.4);
+
+    // Hit flash
+    if (dummy.isHit) {
+        ctx.globalAlpha = 0.3;
+        ctx.fillStyle = '#ff0000';
+        ctx.fillRect(-w/2, -h/2, w, h);
+    }
+
+    ctx.restore();
+}
+
+function drawBullet(ctx, bullet) {
+    ctx.save();
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = '#ffff00';
+    ctx.fillStyle = '#ffff00';
+    ctx.beginPath();
+    ctx.arc(bullet.x, bullet.y, bullet.radius, 0, Math.PI * 2);
+    ctx.fill();
     ctx.restore();
 }
 
@@ -379,6 +430,11 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
             drawPerches(ctx, gameplayManager.getPerches(), gameplayManager.getBasket());
             gameplayManager.getEggs().forEach(egg => drawEgg(ctx, egg));
             drawBasket(ctx, gameplayManager.getBasket());
+        } else if (gameplayManager.mode === GameMode.DUMMY) {
+            // Draw dummies
+            gameplayManager.getDummies().forEach(dummy => drawDummy(ctx, dummy));
+            // Draw bullets
+            gameplayManager.getBullets().forEach(bullet => drawBullet(ctx, bullet));
         }
     }
 
