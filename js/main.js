@@ -187,6 +187,26 @@ async function start(mode) {
         }
 
         isStarted = true;
+        loop(); // Start processing frames immediately to warm up the model
+
+        setStatus(statusEl, 'STAND IN FRAME');
+        
+        // Wait for the first valid result from the model (warm-up phase)
+        await new Promise((resolve) => {
+            const checkReady = () => {
+                if (currentPoseResults && currentPoseResults.poseLandmarks) {
+                    resolve();
+                } else {
+                    requestAnimationFrame(checkReady);
+                }
+            };
+            checkReady();
+        });
+
+        // Small extra delay to ensure GPU has finished all initial compilations
+        setStatus(statusEl, 'STABILIZING...');
+        await new Promise(r => setTimeout(r, 800));
+
         setStatus(statusEl, 'GET READY');
 
         game.reset(); // Clear everything before countdown starts
@@ -207,7 +227,6 @@ async function start(mode) {
         game.start(selectedMode, selectedDuration);
         gameOverShown = false;
 
-        loop();
     } catch (err) {
         console.error('Camera Error:', err);
         let errorMsg = err.message;
