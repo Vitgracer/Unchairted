@@ -584,6 +584,15 @@ footer a:hover {
         flex-wrap: wrap;
     }
 
+    #fps-overlay {
+        top: auto;
+        bottom: 25px;
+        right: 25px;
+        left: auto;
+        border-left: none;
+        border-right: 3px solid var(--primary-red);
+    }
+
     .footer-row.row-1 + .footer-row.row-2::before {
         display: none;
     }

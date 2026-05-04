@@ -46,7 +46,7 @@ export async function runCountdown(element, shouldAbort = () => false) {
 }
 
 export function updateScore(element, score) {
-    element.textContent = score.toString().padStart(4, '0');
+    element.textContent = score;
 }
 
 export function updateTimer(element, remainingTime) {
@@ -68,7 +68,7 @@ export function updateTimer(element, remainingTime) {
 }
 
 export function showGameOver(overlay, scoreValEl, finalScore, stats, mode) {
-    scoreValEl.textContent = finalScore.toString().padStart(4, '0');
+    scoreValEl.textContent = finalScore;
     
     const statsContainer = document.getElementById('game-stats');
     let html = '';

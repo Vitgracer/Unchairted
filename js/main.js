@@ -13,7 +13,7 @@ const menuContainer = document.getElementById('menu-container');
 const startBtn = document.getElementById('start-btn');
 const eggBtn = document.getElementById('egg-btn');
 const statusEl = document.getElementById('status');
-const renderFpsEl = document.getElementById('render-fps');
+
 const poseFpsEl = document.getElementById('pose-fps');
 const countdownEl = document.getElementById('countdown');
 const scoreContainerEl = document.getElementById('score-container');
@@ -37,8 +37,6 @@ let currentPlayArea = null;
 let selectedMode = GameMode.BUBBLE;
 let selectedDuration = 60; // default 1 min
 let gameOverShown = false;
-
-// ... (onPoseResults, loop, renderLoop stay largely the same)
 
 function onPoseResults(results) {
     currentPoseResults = results;
@@ -124,11 +122,6 @@ function renderLoop(now) {
     }
 
     if (isStarted) {
-        renderFrameCount++;
-        const updated = updateFPS(renderFpsEl, renderFrameCount, lastRenderFpsUpdate, now);
-        renderFrameCount = updated.frameCount;
-        lastRenderFpsUpdate = updated.lastUpdateTime;
-
         let deltaTime = lastFrameTime ? (now - lastFrameTime) / 1000 : 0;
         if (deltaTime > 0.1) deltaTime = 0.1;
         lastFrameTime = now;
@@ -151,8 +144,6 @@ function renderLoop(now) {
 }
 
 // FPS tracking vars
-let renderFrameCount = 0;
-let lastRenderFpsUpdate = 0;
 let lastPoseTime = 0;
 let poseFrameCount = 0;
 let lastPoseFpsUpdate = 0;
@@ -269,7 +260,6 @@ async function start(mode) {
         hideElement(videoContainerEl);
     }
 }
-
 
 // Timer Selection Logic
 document.querySelectorAll('.timer-selector').forEach(selector => {

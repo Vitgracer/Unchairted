@@ -42,11 +42,11 @@ function drawPoint(ctx, p, color = '#FF0000', radius = 6) {
  */
 function drawPlayArea(ctx, x, y, size, color = '#ff0000') {
     ctx.save();
-    
+
     // Subtle outer glow
     ctx.shadowBlur = 15;
     ctx.shadowColor = color;
-    
+
     // Draw corners
     const cornerLen = 40;
     const thickness = 4;
@@ -85,20 +85,20 @@ function drawPlayArea(ctx, x, y, size, color = '#ff0000') {
     // Semi-transparent fill for the non-playable area (Dark Pastel Red/Black)
     ctx.fillStyle = 'rgba(20, 0, 0, 0.6)';
     // Top
-    ctx.fillRect(0, 0, ctx.canvas.width, y); 
+    ctx.fillRect(0, 0, ctx.canvas.width, y);
     // Bottom
-    ctx.fillRect(0, y + size, ctx.canvas.width, ctx.canvas.height - (y + size)); 
+    ctx.fillRect(0, y + size, ctx.canvas.width, ctx.canvas.height - (y + size));
     // Left
-    ctx.fillRect(0, y, x, size); 
+    ctx.fillRect(0, y, x, size);
     // Right
-    ctx.fillRect(x + size, y, ctx.canvas.width - (x + size), size); 
+    ctx.fillRect(x + size, y, ctx.canvas.width - (x + size), size);
 
     // Pulse effect for the play area label
     const pulse = (Math.sin(Date.now() / 500) + 1) / 2;
     ctx.font = 'bold 14px Outfit, sans-serif';
     ctx.fillStyle = `rgba(255, 0, 0, ${0.4 + pulse * 0.6})`;
     ctx.textAlign = 'center';
-    
+
     // Un-mirror text (counteracting CSS flip)
     ctx.save();
     ctx.translate(x + size / 2, y + size - 10);
@@ -114,31 +114,31 @@ function drawPerches(ctx, perches, basket = null) {
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
     ctx.lineWidth = 14;
     ctx.lineCap = 'round';
-    
+
     perches.forEach(p => {
         // 1. Draw Perch Pipe
         ctx.beginPath();
         ctx.moveTo(p.x1, p.y1);
         ctx.lineTo(p.x2, p.y2);
         ctx.stroke();
-        
+
         ctx.beginPath();
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
         ctx.lineWidth = 3;
         ctx.moveTo(p.x1, p.y1);
         ctx.lineTo(p.x2, p.y2);
         ctx.stroke();
-        
+
         // Reset for next pipes
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
         ctx.lineWidth = 14;
 
         // 2. Draw Catch Zone Target (Phantom Basket)
         ctx.save();
-        const isNear = basket && Math.sqrt((p.x2 - basket.x)**2 + (p.y2 - basket.y)**2) < 70;
-        
+        const isNear = basket && Math.sqrt((p.x2 - basket.x) ** 2 + (p.y2 - basket.y) ** 2) < 70;
+
         ctx.translate(p.x2, p.y2);
-        
+
         // Target glow
         if (isNear) {
             ctx.shadowBlur = 15;
@@ -172,25 +172,25 @@ function drawPerches(ctx, perches, basket = null) {
 function drawEgg(ctx, egg) {
     ctx.save();
     ctx.translate(egg.x, egg.y);
-    
+
     if (egg.isBreaking) {
         // Draw broken egg (yolk splash)
         const alpha = 1 - (egg.breakTimer / 0.6);
         ctx.globalAlpha = alpha;
-        
+
         // Center yolk
         ctx.beginPath();
         ctx.arc(0, 5, egg.radius * 0.8, 0, Math.PI * 2);
         ctx.fillStyle = '#ffcc00';
         ctx.fill();
-        
+
         // White splashes
         ctx.fillStyle = '#ffffff';
-        for(let i=0; i<6; i++) {
-            const angle = (i/6) * Math.PI * 2;
+        for (let i = 0; i < 6; i++) {
+            const angle = (i / 6) * Math.PI * 2;
             const dist = egg.radius * 1.2;
             ctx.beginPath();
-            ctx.arc(Math.cos(angle)*dist, Math.sin(angle)*dist + 5, egg.radius*0.4, 0, Math.PI*2);
+            ctx.arc(Math.cos(angle) * dist, Math.sin(angle) * dist + 5, egg.radius * 0.4, 0, Math.PI * 2);
             ctx.fill();
         }
     } else {
@@ -198,33 +198,33 @@ function drawEgg(ctx, egg) {
         // Egg shape
         ctx.beginPath();
         ctx.ellipse(0, 0, egg.radius * 0.8, egg.radius, 0, 0, Math.PI * 2);
-        
+
         // Gradient for 3D look
         const grad = ctx.createRadialGradient(-egg.radius * 0.3, -egg.radius * 0.3, 2, 0, 0, egg.radius);
         grad.addColorStop(0, '#ffffff');
         grad.addColorStop(1, '#e0e0e0');
-        
+
         ctx.fillStyle = grad;
         ctx.fill();
-        
+
         ctx.strokeStyle = 'rgba(0,0,0,0.1)';
         ctx.lineWidth = 1;
         ctx.stroke();
     }
-    
+
     ctx.restore();
 }
 
 function drawBasket(ctx, basket) {
     if (!basket) return;
     ctx.save();
-    
+
     // Glow
     ctx.shadowBlur = 15;
     ctx.shadowColor = '#ffcc00';
-    
+
     ctx.translate(basket.x, basket.y);
-    
+
     // Basket shape (trapezoid)
     ctx.beginPath();
     ctx.moveTo(-basket.width / 2, -basket.height / 2);
@@ -232,29 +232,29 @@ function drawBasket(ctx, basket) {
     ctx.lineTo(basket.width / 2 - 10, basket.height / 2);
     ctx.lineTo(-basket.width / 2 + 10, basket.height / 2);
     ctx.closePath();
-    
+
     const grad = ctx.createLinearGradient(0, -basket.height / 2, 0, basket.height / 2);
     grad.addColorStop(0, '#ffcc00');
     grad.addColorStop(1, '#ff9900');
-    
+
     ctx.fillStyle = grad;
     ctx.fill();
-    
+
     // Edge
     ctx.strokeStyle = '#fff';
     ctx.lineWidth = 3;
     ctx.stroke();
-    
+
     // Woven pattern (simple lines)
     ctx.strokeStyle = 'rgba(0,0,0,0.2)';
     ctx.lineWidth = 1;
-    for(let i = -basket.width/2 + 15; i < basket.width/2 - 10; i += 15) {
+    for (let i = -basket.width / 2 + 15; i < basket.width / 2 - 10; i += 15) {
         ctx.beginPath();
-        ctx.moveTo(i, -basket.height/2);
-        ctx.lineTo(i + 5, basket.height/2);
+        ctx.moveTo(i, -basket.height / 2);
+        ctx.lineTo(i + 5, basket.height / 2);
         ctx.stroke();
     }
-    
+
     ctx.restore();
 }
 
@@ -286,7 +286,7 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
         if (gameplayManager.laser) {
             const laser = gameplayManager.laser;
             ctx.save();
-            
+
             // 1. Draw "Scanline"
             ctx.strokeStyle = 'rgba(255, 0, 0, 0.15)';
             ctx.setLineDash([5, 10]);
@@ -304,7 +304,7 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
                 ctx.setLineDash([2, 5]);
                 ctx.lineWidth = 2;
                 ctx.strokeStyle = isUnder ? 'rgba(0, 255, 0, 0.5)' : 'rgba(255, 0, 0, 0.8)';
-                
+
                 if (!isUnder && nearLaser) {
                     ctx.shadowBlur = 15;
                     ctx.shadowColor = 'red';
@@ -315,7 +315,7 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
                 ctx.moveTo(headPoint.x, headPoint.y);
                 ctx.lineTo(headPoint.x, laser.y);
                 ctx.stroke();
-                
+
                 ctx.beginPath();
                 ctx.arc(headPoint.x, laser.y, 5, 0, Math.PI * 2);
                 ctx.fillStyle = isUnder ? '#00FF00' : '#FF0000';
@@ -326,15 +326,15 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
             // 3. OPTIMIZED LASER (Smooth gradients, no expensive shadows)
             const time = Date.now();
             const pulseAlpha = 0.7 + Math.sin(time / 200) * 0.3; // Light pulsing for visibility
-            
+
             // --- Outer Glow (Massive Vertical Gradient - very fast) ---
             const glowHeight = 100; // Increased for maximum visibility on mobile
-            const outerGrad = ctx.createLinearGradient(laser.x, laser.y - glowHeight/2, laser.x, laser.y + glowHeight/2);
+            const outerGrad = ctx.createLinearGradient(laser.x, laser.y - glowHeight / 2, laser.x, laser.y + glowHeight / 2);
             outerGrad.addColorStop(0, 'rgba(255, 0, 0, 0)');
             outerGrad.addColorStop(0.5, `rgba(255, 0, 0, ${0.3 * pulseAlpha})`);
             outerGrad.addColorStop(1, 'rgba(255, 0, 0, 0)');
             ctx.fillStyle = outerGrad;
-            ctx.fillRect(laser.x, laser.y - glowHeight/2, laser.width, glowHeight);
+            ctx.fillRect(laser.x, laser.y - glowHeight / 2, laser.width, glowHeight);
 
             // --- Main Beam Body (Neon core) ---
             const beamGrad = ctx.createLinearGradient(laser.x, laser.y - 6, laser.x, laser.y + 6);
@@ -347,7 +347,7 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
             // --- Razor Core (Extreme heat) ---
             ctx.fillStyle = `rgba(255, 255, 255, ${0.95 * pulseAlpha})`;
             ctx.fillRect(laser.x + 10, laser.y - 1, laser.width - 20, 2);
-            
+
             ctx.restore();
         }
 
@@ -355,9 +355,9 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
             gameplayManager.getBubbles().forEach(bubble => {
                 if (bubble.isPopped) {
                     ctx.beginPath();
-                    ctx.arc(bubble.x, bubble.y, bubble.radius * (1 + bubble.popTimer/10), 0, Math.PI * 2);
+                    ctx.arc(bubble.x, bubble.y, bubble.radius * (1 + bubble.popTimer / 10), 0, Math.PI * 2);
                     ctx.strokeStyle = bubble.color;
-                    ctx.globalAlpha = 1 - bubble.popTimer/10;
+                    ctx.globalAlpha = 1 - bubble.popTimer / 10;
                     ctx.lineWidth = 1;
                     ctx.stroke();
                 } else {
@@ -366,7 +366,7 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
                     grad.addColorStop(0, bubble.color);
                     grad.addColorStop(0.8, bubble.color);
                     grad.addColorStop(1, 'rgba(255,255,255,0)');
-                    
+
                     ctx.globalAlpha = 0.7;
                     ctx.fillStyle = grad;
                     ctx.beginPath();
@@ -384,7 +384,7 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
 
     // 2. Draw Skeleton
     if (lms && mapLM) {
-        const head = headPoint; 
+        const head = headPoint;
         const leftHandArr = getCenterOfMass(lms, [15, 17, 19, 21]);
         const rightHandArr = getCenterOfMass(lms, [16, 18, 20, 22]);
         const leftHand = leftHandArr ? mapLM(leftHandArr) : null;
@@ -429,11 +429,11 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
                     ctx.setLineDash([5, 5]);
                     ctx.lineWidth = 2;
                     ctx.stroke();
-                    
+
                     // Optional: subtle glow inside
                     ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
                     ctx.fill();
-                    
+
                     ctx.restore();
                 }
             });
@@ -451,14 +451,14 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
         ctx.save();
         ctx.fillStyle = 'rgba(255, 0, 0, 0.4)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
+
         ctx.fillStyle = 'white';
         ctx.font = '900 80px Outfit, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.shadowBlur = 20;
         ctx.shadowColor = 'black';
-        
+
         // Mirror un-flip for text (same as play area label)
         ctx.translate(canvas.width / 2, canvas.height / 2);
         ctx.scale(-1, 1);
@@ -471,7 +471,7 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
         gameplayManager.getEffects().forEach(fx => {
             ctx.save();
             ctx.globalAlpha = fx.life;
-            
+
             // Set font based on type
             if (fx.type === 'penalty') {
                 ctx.font = `900 ${fx.size}px Syncopate, sans-serif`;
@@ -484,9 +484,9 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
                 ctx.shadowBlur = 5;
                 ctx.shadowColor = 'rgba(0,0,0,0.5)';
             }
-            
+
             ctx.textAlign = 'center';
-            
+
             // Un-mirror for text
             ctx.translate(fx.x, fx.y);
             ctx.scale(-1, 1);
