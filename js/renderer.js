@@ -277,6 +277,7 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
             const laser = gameplayManager.laser;
             ctx.save();
 
+            /*
             // 1. Draw "Scanline"
             ctx.strokeStyle = 'rgba(255, 0, 0, 0.15)';
             ctx.setLineDash([5, 10]);
@@ -312,6 +313,7 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
                 ctx.fill();
                 ctx.restore();
             }
+            */
 
             // 3. OPTIMIZED LASER (Smooth gradients, no expensive shadows)
             const time = Date.now();
@@ -414,6 +416,7 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
             drawPoint(ctx, head, '#ffffff', 10); // Center head in white
         }
 
+        // Hand Interaction Zones (Bubble Mode) - 40px radius
         // Hand Interaction Zones (Bubble Mode) - 40px radius
         if (gameplayManager && gameplayManager.mode === GameMode.BUBBLE) {
             [leftHand, rightHand].forEach(hand => {
