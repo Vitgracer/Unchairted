@@ -322,6 +322,40 @@ video, canvas {
     font-weight: bold;
 }
 
+/* Home Button */
+.home-btn {
+    position: fixed;
+    bottom: 25px;
+    left: 25px;
+    width: 50px;
+    height: 50px;
+    border-radius: 15px;
+    border: 1px solid var(--glass-border);
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    padding: 0;
+}
+
+.home-btn:hover {
+    background: var(--primary-red);
+    border-color: var(--primary-red);
+    box-shadow: var(--neon-glow);
+    transform: scale(1.1);
+}
+
+.home-btn:active {
+    transform: scale(0.9);
+}
+
 #status {
     position: fixed;
     bottom: 80px;

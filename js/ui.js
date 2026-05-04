@@ -26,11 +26,15 @@ export function showElement(element, display = 'block') {
     }
 }
 
-export async function runCountdown(element) {
+export async function runCountdown(element, shouldAbort = () => false) {
     showElement(element);
     const steps = ['3', '2', '1', 'GO!'];
     
     for (const step of steps) {
+        if (shouldAbort()) {
+            hideElement(element);
+            return;
+        }
         element.textContent = step;
         element.classList.remove('countdown-animate');
         void element.offsetWidth; // Trigger reflow

@@ -25,6 +25,7 @@ const gameTimerEl = document.getElementById('game-timer');
 const gameOverEl = document.getElementById('game-over');
 const finalScoreEl = document.getElementById('final-score-val');
 const backToMenuBtn = document.getElementById('back-to-menu-btn');
+const homeBtn = document.getElementById('home-btn');
 
 const game = new GameplayManager();
 let pose;
@@ -157,6 +158,27 @@ let poseFrameCount = 0;
 let lastPoseFpsUpdate = 0;
 let lastFrameTime = 0;
 
+function returnToMenu() {
+    isStarted = false;
+    game.reset(); // Stop any active game logic
+    
+    hideElement(gameOverEl);
+    hideElement(videoContainerEl);
+    hideElement(scoreContainerEl);
+    hideElement(gameTimerEl);
+    hideElement(fpsOverlayEl);
+    hideElement(statusEl);
+    hideElement(countdownEl);
+    gameTimerEl.classList.remove('timer-critical');
+    
+    showElement(mainUiEl);
+    showElement(document.getElementById('hero-bg'));
+    showElement(document.getElementById('overlay-glow'));
+    if (document.getElementById('smoke-layer')) showElement(document.getElementById('smoke-layer'));
+    
+    videoContainerEl.style.opacity = '0';
+}
+
 async function start(mode) {
     selectedMode = mode;
     hideElement(mainUiEl);
@@ -194,6 +216,7 @@ async function start(mode) {
         // Wait for the first valid result from the model (warm-up phase)
         await new Promise((resolve) => {
             const checkReady = () => {
+                if (!isStarted) return; // User exited during warm-up
                 if (currentPoseResults && currentPoseResults.poseLandmarks) {
                     resolve();
                 } else {
@@ -203,15 +226,21 @@ async function start(mode) {
             checkReady();
         });
 
+        if (!isStarted) return;
+
         // Small extra delay to ensure GPU has finished all initial compilations
         setStatus(statusEl, 'STABILIZING...');
         await new Promise(r => setTimeout(r, 800));
+        
+        if (!isStarted) return;
 
         setStatus(statusEl, 'GET READY');
 
         game.reset(); // Clear everything before countdown starts
 
-        await runCountdown(countdownEl);
+        await runCountdown(countdownEl, () => !isStarted);
+        
+        if (!isStarted) return; // User exited during countdown
         
         hideElement(statusEl);
         showElement(scoreContainerEl);
@@ -256,22 +285,9 @@ document.querySelectorAll('.timer-selector').forEach(selector => {
     });
 });
 
-backToMenuBtn.addEventListener('click', () => {
-    hideElement(gameOverEl);
-    hideElement(videoContainerEl);
-    hideElement(scoreContainerEl);
-    hideElement(gameTimerEl);
-    gameTimerEl.classList.remove('timer-critical');
-    showElement(mainUiEl);
-    showElement(document.getElementById('hero-bg'));
-    showElement(document.getElementById('overlay-glow'));
-    if (document.getElementById('smoke-layer')) showElement(document.getElementById('smoke-layer'));
-    
-    isStarted = false;
-    videoContainerEl.style.opacity = '0';
-});
+backToMenuBtn.addEventListener('click', returnToMenu);
+homeBtn.addEventListener('click', returnToMenu);
 
 startBtn.addEventListener('click', () => start(GameMode.BUBBLE));
 eggBtn.addEventListener('click', () => start(GameMode.EGG));
 requestAnimationFrame(renderLoop);
-
