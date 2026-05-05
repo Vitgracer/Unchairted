@@ -186,6 +186,9 @@ export class GameplayManager {
         this.duration = 60; // default 1 min
         this.remainingTime = 60;
         this.difficultyPhase = 0; // 0, 1, 2
+
+        this.isCalibrating = false;
+        this.calibrationTargets = [];
     }
 
     addEffect(text, type) {
@@ -205,6 +208,8 @@ export class GameplayManager {
         this.isPenaltyActive = false;
         this.effects = [];
         this.gameStarted = false;
+        this.isCalibrating = false;
+        this.calibrationTargets = [];
         this.remainingTime = this.duration;
 
         // Statistics
@@ -222,14 +227,52 @@ export class GameplayManager {
         this.mode = mode;
         this.duration = duration;
         this.remainingTime = duration === 0 ? Infinity : duration;
-        this.gameStarted = true;
         this.reset();
-        this.gameStarted = true; // reset() sets it to false, need to set it back if we call it from start
+        this.gameStarted = true;
         
         if (this.mode === GameMode.EGG) {
-            this.spawnInterval = 600; // Reduced by ~4x (was 2500)
+            this.spawnInterval = 600; 
         } else {
-            this.spawnInterval = 450; // Reduced by 4x (was 1800)
+            this.spawnInterval = 450;
+        }
+    }
+
+    startCalibration(playArea = null) {
+        if (playArea) {
+            this.playArea = playArea;
+        }
+        this.isCalibrating = true;
+        const { minX, maxX, minY, size } = this.playArea;
+        const centerX = minX + size / 2;
+        
+        this.calibrationTargets = [
+            { id: 'head', x: centerX, y: minY + size * 0.25, radius: 120, isActive: false, label: 'HEAD' },
+            { id: 'leftHand', x: maxX - size * 0.2, y: minY + size * 0.5, radius: 100, isActive: false, label: 'LEFT HAND' },
+            { id: 'rightHand', x: minX + size * 0.2, y: minY + size * 0.5, radius: 100, isActive: false, label: 'RIGHT HAND' }
+        ];
+    }
+
+    updateCalibration(headPoint, handPoints) {
+        if (!this.isCalibrating) return;
+
+        let allActive = true;
+        this.calibrationTargets.forEach(target => {
+            let active = false;
+            if (target.id === 'head' && headPoint) {
+                const dist = Math.sqrt((headPoint.x - target.x)**2 + (headPoint.y - target.y)**2);
+                if (dist < target.radius) active = true;
+            } else if (handPoints) {
+                handPoints.forEach(hand => {
+                    const dist = Math.sqrt((hand.x - target.x)**2 + (hand.y - target.y)**2);
+                    if (dist < target.radius) active = true;
+                });
+            }
+            target.isActive = active;
+            if (!active) allActive = false;
+        });
+
+        if (allActive) {
+            this.isCalibrating = false;
         }
     }
 

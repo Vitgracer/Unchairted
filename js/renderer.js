@@ -248,6 +248,55 @@ function drawBasket(ctx, basket) {
     ctx.restore();
 }
 
+function drawCalibration(ctx, gameplayManager) {
+    if (!gameplayManager || !gameplayManager.isCalibrating) return;
+
+    gameplayManager.calibrationTargets.forEach(target => {
+        ctx.save();
+        
+        const color = target.isActive ? '#00FF00' : '#FF0000';
+        const pulse = (Math.sin(Date.now() / 300) + 1) / 2;
+        
+        // Outer glow
+        ctx.shadowBlur = target.isActive ? 25 : 15;
+        ctx.shadowColor = color;
+        
+        // Main circle
+        ctx.beginPath();
+        ctx.arc(target.x, target.y, target.radius, 0, Math.PI * 2);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 4;
+        if (!target.isActive) {
+            ctx.setLineDash([10, 5]);
+        }
+        ctx.stroke();
+        
+        // Inner pulse
+        ctx.beginPath();
+        ctx.arc(target.x, target.y, target.radius * (0.8 + pulse * 0.1), 0, Math.PI * 2);
+        ctx.fillStyle = target.isActive ? `rgba(0, 255, 0, 0.2)` : `rgba(255, 0, 0, ${0.1 + pulse * 0.1})`;
+        ctx.fill();
+
+        // Label
+        ctx.save();
+        ctx.translate(target.x, target.y + target.radius + 25);
+        ctx.scale(-1, 1); // Un-mirror
+        ctx.font = 'bold 16px Outfit, sans-serif';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.fillText(target.label, 0, 0);
+        
+        if (target.isActive) {
+            ctx.font = 'bold 12px Outfit, sans-serif';
+            ctx.fillStyle = '#00FF00';
+            ctx.fillText('LOCKED', 0, 15);
+        }
+        ctx.restore();
+
+        ctx.restore();
+    });
+}
+
 export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
     ctx.save();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -267,8 +316,13 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
 
     const headPoint = (lms && mapLM) ? mapLM(lms[0]) : null;
 
+    // 0. Draw Calibration Targets (if active)
+    if (gameplayManager && gameplayManager.isCalibrating) {
+        drawCalibration(ctx, gameplayManager);
+    }
+
     // 1. Draw Gameplay Elements (if active)
-    if (gameplayManager && gameplayManager.gameStarted) {
+    if (gameplayManager && (gameplayManager.gameStarted || gameplayManager.isCalibrating)) {
         // Draw Play Area Boundary
         drawPlayArea(ctx, sx, sy, minDim);
 

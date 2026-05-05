@@ -52,7 +52,7 @@ function onPoseResults(results) {
     lastPoseTime = now;
 
     // Handle gameplay updates
-    if (game.gameStarted) {
+    if (isStarted) {
         const vWidth = video.videoWidth;
         const vHeight = video.videoHeight;
         const minDim = Math.min(vWidth, vHeight);
@@ -126,11 +126,15 @@ function renderLoop(now) {
         if (deltaTime > 0.1) deltaTime = 0.1;
         lastFrameTime = now;
 
+        if (game.isCalibrating) {
+            game.updateCalibration(headPoint, handPoints);
+        }
+
         if (game.gameStarted) {
             game.update(canvas.width, canvas.height, handPoints, currentPlayArea, deltaTime, headPoint);
             updateScore(scoreValEl, game.getScore());
             updateTimer(gameTimerEl, game.remainingTime);
-        } else if (isStarted && !game.gameStarted && !gameOverShown && game.remainingTime === 0) {
+        } else if (isStarted && !game.gameStarted && !gameOverShown && game.remainingTime === 0 && !game.isCalibrating) {
             // Game just ended
             gameOverShown = true;
             showGameOver(gameOverEl, finalScoreEl, game.getScore(), game.stats, game.mode);
@@ -220,14 +224,31 @@ async function start(mode) {
         if (!isStarted) return;
 
         // Small extra delay to ensure GPU has finished all initial compilations
-        setStatus(statusEl, 'STABILIZING...');
-        await new Promise(r => setTimeout(r, 800));
+        if (!isStarted) return;
         
+        // Calibration Phase
+        setStatus(statusEl, 'ALIGN YOURSELF');
+        game.startCalibration(currentPlayArea);
+        
+        // Wait for calibration to complete
+        await new Promise((resolve) => {
+            const checkCalibration = () => {
+                if (!isStarted) return;
+                if (!game.isCalibrating) {
+                    resolve();
+                } else {
+                    requestAnimationFrame(checkCalibration);
+                }
+            };
+            checkCalibration();
+        });
+
         if (!isStarted) return;
 
-        setStatus(statusEl, 'GET READY');
+        setStatus(statusEl, 'LOCKED IN!');
+        await new Promise(r => setTimeout(r, 800));
 
-        game.reset(); // Clear everything before countdown starts
+        if (!isStarted) return;
 
         await runCountdown(countdownEl, () => !isStarted);
         
