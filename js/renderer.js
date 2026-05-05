@@ -29,12 +29,27 @@ function drawLine(ctx, p1, p2, color = '#ff0000', width = 4) {
     ctx.stroke();
 }
 
-function drawPoint(ctx, p, color = '#FF0000', radius = 6) {
+function drawPoint(ctx, p, color = '#FF0000', radius = 6, glowColor = null) {
     if (!p) return;
+    ctx.save();
+    
+    if (glowColor) {
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = glowColor;
+    }
+    
     ctx.beginPath();
     ctx.arc(p.x, p.y, radius, 0, 2 * Math.PI);
     ctx.fillStyle = color;
     ctx.fill();
+    
+    // Add a small white "highlight" in the center for a 3D effect
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, radius * 0.4, 0, 2 * Math.PI);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.fill();
+    
+    ctx.restore();
 }
 
 /**
@@ -399,6 +414,7 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
 
         if (gameplayManager.mode === GameMode.BUBBLE) {
             gameplayManager.getBubbles().forEach(bubble => {
+                ctx.save();
                 if (bubble.isPopped) {
                     ctx.beginPath();
                     ctx.arc(bubble.x, bubble.y, bubble.radius * (1 + bubble.popTimer / 10), 0, Math.PI * 2);
@@ -407,7 +423,6 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
                     ctx.lineWidth = 1;
                     ctx.stroke();
                 } else {
-                    ctx.save();
                     const grad = ctx.createRadialGradient(bubble.x, bubble.y, 0, bubble.x, bubble.y, bubble.radius);
                     grad.addColorStop(0, bubble.color);
                     grad.addColorStop(0.8, bubble.color);
@@ -418,8 +433,8 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
                     ctx.beginPath();
                     ctx.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
                     ctx.fill();
-                    ctx.restore();
                 }
+                ctx.restore();
             });
         } else if (gameplayManager.mode === GameMode.EGG) {
             drawPerches(ctx, gameplayManager.getPerches(), gameplayManager.getBasket());
@@ -466,11 +481,10 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
         */
 
         if (gameplayManager && gameplayManager.mode === GameMode.BUBBLE) {
-            ctx.shadowColor = '#ffffff';
-            drawPoint(ctx, head, '#ffffff', 10); // Center head in white
+            ctx.shadowColor = '#ff0000';
+            drawPoint(ctx, head, '#ff0000', 12, '#ff0000'); // Larger neon red head
         }
 
-        // Hand Interaction Zones (Bubble Mode) - 40px radius
         // Hand Interaction Zones (Bubble Mode) - 40px radius
         if (gameplayManager && gameplayManager.mode === GameMode.BUBBLE) {
             [leftHand, rightHand].forEach(hand => {
@@ -478,13 +492,13 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
                     ctx.save();
                     ctx.beginPath();
                     ctx.arc(hand.x, hand.y, 40, 0, Math.PI * 2);
-                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                    ctx.strokeStyle = 'rgba(255, 0, 0, 0.4)'; // Red zones
                     ctx.setLineDash([5, 5]);
                     ctx.lineWidth = 2;
                     ctx.stroke();
 
                     // Optional: subtle glow inside
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+                    ctx.fillStyle = 'rgba(255, 0, 0, 0.05)';
                     ctx.fill();
 
                     ctx.restore();
@@ -495,8 +509,8 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
         // Draw hand points only if no basket is being drawn
         const isBasketActive = gameplayManager && gameplayManager.getBasket();
         if (!isBasketActive) {
-            drawPoint(ctx, leftHand, '#ffffff', 8);
-            drawPoint(ctx, rightHand, '#ffffff', 8);
+            drawPoint(ctx, leftHand, '#ff0000', 10, '#ff0000'); // Neon red hands
+            drawPoint(ctx, rightHand, '#ff0000', 10, '#ff0000');
         }
 
         // --- OTHER JOINTS (Commented out for debug) ---
