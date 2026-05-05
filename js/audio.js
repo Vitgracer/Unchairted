@@ -16,7 +16,8 @@ class AudioManager {
             pop: 'assets/audio/pop.mp3',
             eggCatch: 'assets/audio/egg_catch.mp3',
             eggCrash: 'assets/audio/egg_crash.mp3',
-            laserFail: 'assets/audio/laser_fail.mp3'
+            laserFail: 'assets/audio/laser_fail.mp3',
+            timer: 'assets/audio/timer.mp3'
         };
 
         for (const [key, path] of Object.entries(soundFiles)) {
