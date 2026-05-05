@@ -17,7 +17,10 @@ class AudioManager {
             eggCatch: 'assets/audio/egg_catch.mp3',
             eggCrash: 'assets/audio/egg_crash.mp3',
             laserFail: 'assets/audio/laser_fail.mp3',
-            timer: 'assets/audio/timer.mp3'
+            timer: 'assets/audio/timer.mp3',
+            home: 'assets/audio/background_home.mp3',
+            bubble: 'assets/audio/background_bubble_hunter.mp3',
+            egg: 'assets/audio/background_egg_catcher.mp3'
         };
 
         for (const [key, path] of Object.entries(soundFiles)) {
@@ -54,6 +57,24 @@ class AudioManager {
             this.sounds[key].pause();
             this.sounds[key].currentTime = 0;
         }
+    }
+
+    playMusic(key, volume = 0.4) {
+        if (!this.enabled || !this.sounds[key]) return;
+        
+        // Stop any other music that might be playing
+        ['home', 'bubble', 'egg'].forEach(k => {
+            if (k !== key) this.stop(k);
+        });
+
+        const music = this.sounds[key];
+        music.loop = true;
+        music.volume = volume;
+        music.play().catch(e => console.warn('Music play failed:', e));
+    }
+
+    stopMusic() {
+        ['home', 'bubble', 'egg'].forEach(k => this.stop(k));
     }
 }
 

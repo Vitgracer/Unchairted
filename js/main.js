@@ -173,6 +173,9 @@ function returnToMenu() {
     if (document.getElementById('smoke-layer')) showElement(document.getElementById('smoke-layer'));
     
     videoContainerEl.style.opacity = '0';
+    
+    // Switch to Home Music
+    audio.playMusic('home', 0.3);
 }
 
 async function start(mode) {
@@ -190,6 +193,10 @@ async function start(mode) {
 
     // Initialize Audio on first user gesture
     await audio.init();
+    
+    // Switch to Game Music (depending on mode)
+    const musicKey = mode === GameMode.BUBBLE ? 'bubble' : 'egg';
+    audio.playMusic(musicKey, 0.4);
 
     // Clear old data to prevent "ghost" poses from previous games
     currentPoseResults = null;
@@ -305,4 +312,17 @@ homeBtn.addEventListener('click', returnToMenu);
 
 startBtn.addEventListener('click', () => start(GameMode.BUBBLE));
 eggBtn.addEventListener('click', () => start(GameMode.EGG));
+
+// Global interaction listener to start Home Music on first click/tap
+window.addEventListener('click', async () => {
+    try {
+        await audio.init();
+        if (!isStarted) {
+            audio.playMusic('home', 0.3);
+        }
+    } catch (e) {
+        console.warn('Initial audio start failed:', e);
+    }
+}, { once: true });
+
 requestAnimationFrame(renderLoop);
