@@ -248,9 +248,9 @@ export class GameplayManager {
         const centerX = minX + size / 2;
         
         this.calibrationTargets = [
-            { id: 'head', x: centerX, y: minY + size * 0.25, radius: 120, isActive: false, label: 'HEAD' },
-            { id: 'leftHand', x: maxX - size * 0.2, y: minY + size * 0.5, radius: 100, isActive: false, label: 'LEFT HAND' },
-            { id: 'rightHand', x: minX + size * 0.2, y: minY + size * 0.5, radius: 100, isActive: false, label: 'RIGHT HAND' }
+            { id: 'head', x: centerX, y: minY + size * 0.40, radius: 120, isActive: false, label: 'HEAD' },
+            { id: 'leftHand', x: maxX - size * 0.2, y: minY + size * 0.65, radius: 100, isActive: false, label: 'LEFT HAND' },
+            { id: 'rightHand', x: minX + size * 0.2, y: minY + size * 0.65, radius: 100, isActive: false, label: 'RIGHT HAND' }
         ];
     }
 
