@@ -3,6 +3,8 @@ export const GameMode = {
     EGG: 'EGG'
 };
 
+import { audio } from './audio.js';
+
 class Bubble {
     constructor(minX, maxX, minY) {
         this.radius = Math.random() * 20 + 20; // 20-40px
@@ -377,6 +379,7 @@ export class GameplayManager {
                         this.score += 10;
                         this.stats.popped++;
                         this.addEffect('+10', 'pos');
+                        audio.play('pop', 0.6);
                     }
                 });
             });
@@ -401,11 +404,13 @@ export class GameplayManager {
                     this.score = Math.max(0, this.score - 10);
                     this.stats.eggsBroken++;
                     this.addEffect('-10', 'neg');
+                    audio.play('eggCrash', 0.5);
                 }
                 if (this.basket && egg.checkCollision(this.basket)) {
                     this.score += 10;
                     this.stats.eggsCaught++;
                     this.addEffect('+10', 'pos');
+                    audio.play('eggCatch', 0.7);
                 }
             });
             
@@ -433,6 +438,7 @@ export class GameplayManager {
                         this.score = Math.max(0, this.score - 50);
                         this.stats.lasersHit++;
                         this.addEffect('-50', 'penalty');
+                        audio.play('laserFail', 0.8);
                     }
                     this.isPenaltyActive = true;
                     this.penaltyTimer = 0.3;

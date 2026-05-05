@@ -3,6 +3,7 @@ import { initPose, processFrame } from './pose.js';
 import { drawPose } from './renderer.js';
 import { setStatus, updateFPS, hideElement, showElement, runCountdown, updateScore, updateTimer, showGameOver } from './ui.js';
 import { GameplayManager, GameMode } from './gameplay.js';
+import { audio } from './audio.js';
 
 const video = document.getElementById('input-video');
 const canvas = document.getElementById('output-canvas');
@@ -186,6 +187,9 @@ async function start(mode) {
     videoContainerEl.style.opacity = '1';
     
     setStatus(statusEl, 'SYSTEM INITIALIZING...');
+
+    // Initialize Audio on first user gesture
+    await audio.init();
 
     // Clear old data to prevent "ghost" poses from previous games
     currentPoseResults = null;

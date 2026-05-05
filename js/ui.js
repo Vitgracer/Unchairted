@@ -1,3 +1,5 @@
+import { audio } from './audio.js';
+
 export function setStatus(element, text, isHtml = false) {
     if (isHtml) {
         element.innerHTML = text;
