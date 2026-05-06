@@ -4,6 +4,7 @@ import os
 VIDEO_PATH = "input.mp4"
 OUTPUT_FOLDER = "frames"
 FRAME_STEP = 1
+USE_CENTRAL_CROP = True
 
 def video_to_frames():
     if not os.path.exists(OUTPUT_FOLDER):
