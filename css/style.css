@@ -678,6 +678,15 @@ footer a:hover {
     box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
 }
 
+/* Infinity symbol specific styling */
+.timer-btn[data-time="0"] {
+    font-size: 1.3rem;
+    line-height: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 /* On-Game Timer Display */
 #game-timer {
     position: absolute;
