@@ -314,10 +314,14 @@ startBtn.addEventListener('click', () => start(GameMode.BUBBLE));
 eggBtn.addEventListener('click', () => start(GameMode.EGG));
 
 // Global interaction listener to start Home Music on first click/tap
-window.addEventListener('click', async () => {
+window.addEventListener('click', async (e) => {
     try {
         await audio.init();
-        if (!isStarted) {
+        
+        // Check if we clicked a button that starts the game
+        const isStartButtonClick = e.target.closest('#start-btn') || e.target.closest('#egg-btn');
+        
+        if (!isStarted && !isStartButtonClick) {
             audio.playMusic('home', 0.3);
         }
     } catch (e) {
