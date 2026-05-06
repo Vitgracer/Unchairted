@@ -1,7 +1,7 @@
 import { initCamera, handleResize } from './camera.js';
 import { initPose, processFrame } from './pose.js';
 import { drawPose } from './renderer.js';
-import { setStatus, updateFPS, hideElement, showElement, runCountdown, updateScore, updateTimer, showGameOver } from './ui.js';
+import { setStatus, updateFPS, hideElement, showElement, runCountdown, updateScore, updateTimer, showGameOver, showTutorial } from './ui.js';
 import { GameplayManager, GameMode } from './gameplay.js';
 import { audio } from './audio.js';
 
@@ -194,6 +194,9 @@ async function start(mode) {
     // Initialize Audio on first user gesture
     await audio.init();
     
+    // Show Tutorial and wait for user to click OK
+    await showTutorial(mode);
+
     // Switch to Game Music (depending on mode)
     const musicKey = mode === GameMode.BUBBLE ? 'bubble' : 'egg';
     audio.playMusic(musicKey, 0.4);

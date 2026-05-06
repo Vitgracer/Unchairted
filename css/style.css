@@ -809,3 +809,115 @@ footer a:hover {
 
 .stat-value.pos { color: #00ffcc; }
 .stat-value.neg { color: #ff0055; }
+
+/* Tutorial Overlay Styles */
+#tutorial-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 5000; /* Above everything */
+    opacity: 0;
+    animation: fadeIn 0.4s ease forwards;
+}
+
+#tutorial-overlay.hidden {
+    display: none !important;
+}
+
+.tutorial-content {
+    background: linear-gradient(135deg, rgba(30, 0, 0, 0.95) 0%, rgba(10, 10, 10, 0.95) 100%);
+    border: 2px solid var(--primary-red);
+    border-radius: 32px;
+    padding: 40px;
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 0 50px rgba(255, 0, 0, 0.2);
+    transform: translateY(20px);
+    animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+#tutorial-title {
+    font-family: 'Syncopate', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 5px;
+    margin-bottom: 25px;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}
+
+.tutorial-media {
+    width: 100%;
+    aspect-ratio: 1/1;
+    background: #000;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+}
+
+#tutorial-gif {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#tutorial-instructions {
+    font-size: 1rem;
+    color: var(--text-gray);
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+#tutorial-instructions ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#tutorial-instructions li {
+    margin-bottom: 8px;
+}
+
+#tutorial-ok-btn {
+    background: var(--primary-red);
+    color: #fff;
+    font-size: 1rem;
+    padding: 18px;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
+}
+
+#tutorial-ok-btn:hover {
+    background: #fff;
+    color: #000;
+    transform: scale(1.05);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Mobile adjustments for tutorial */
+@media (max-width: 600px) {
+    .tutorial-content {
+        padding: 25px;
+    }
+    #tutorial-title {
+        font-size: 1.2rem;
+    }
+}

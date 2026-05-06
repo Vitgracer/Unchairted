@@ -123,3 +123,42 @@ export function showGameOver(overlay, scoreValEl, finalScore, stats, mode) {
     statsContainer.innerHTML = html;
     overlay.classList.remove('hidden');
 }
+
+export async function showTutorial(mode) {
+    const overlay = document.getElementById('tutorial-overlay');
+    const gif = document.getElementById('tutorial-gif');
+    const title = document.getElementById('tutorial-title');
+    const instructions = document.getElementById('tutorial-instructions');
+    const okBtn = document.getElementById('tutorial-ok-btn');
+
+    if (mode === 'BUBBLE') {
+        title.textContent = 'BUBBLE HUNTER';
+        gif.src = 'assets/gifs/bubble_hunter/tutorial.gif';
+        instructions.innerHTML = `
+            <ul>
+                <li>Pop bubbles with your <strong>hands</strong></li>
+                <li>Avoid the red <strong>laser</strong> (DUCK!)</li>
+                <li>Don't let bubbles escape!</li>
+            </ul>
+        `;
+    } else {
+        title.textContent = 'EGG CATCHER';
+        gif.src = 'assets/gifs/egg_catcher/tutorial.gif';
+        instructions.innerHTML = `
+            <ul>
+                <li>Bring <strong>hands together</strong> to spawn basket</li>
+                <li>Catch eggs in the target zones</li>
+                <li>Don't let them break on the floor!</li>
+            </ul>
+        `;
+    }
+
+    showElement(overlay, 'flex');
+
+    return new Promise(resolve => {
+        okBtn.onclick = () => {
+            hideElement(overlay);
+            resolve();
+        };
+    });
+}
