@@ -341,7 +341,31 @@ privacyOverlay.addEventListener('click', (e) => {
     if (e.target === privacyOverlay) hideElement(privacyOverlay);
 });
 
-// Global interaction listener to start Home Music on first click/tap
+const menuToggle = document.getElementById('menu-toggle');
+const navMenu = document.getElementById('nav-menu');
+
+menuToggle.addEventListener('click', () => {
+    navMenu.classList.toggle('menu-closed');
+    navMenu.classList.toggle('menu-open');
+});
+
+// Close menu when clicking any link inside it
+navMenu.querySelectorAll('a, button').forEach(item => {
+    item.addEventListener('click', () => {
+        if (item.id !== 'menu-toggle') {
+            navMenu.classList.add('menu-closed');
+            navMenu.classList.remove('menu-open');
+        }
+    });
+});
+
+// Close menu when clicking outside
+document.addEventListener('click', (e) => {
+    if (!navMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+        navMenu.classList.add('menu-closed');
+        navMenu.classList.remove('menu-open');
+    }
+});
 window.addEventListener('click', async (e) => {
     try {
         await audio.init();

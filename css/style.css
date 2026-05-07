@@ -797,14 +797,34 @@ footer a:hover {
 }
 
 /* Header Top & Ghost Button */
-.header-top {
+#menu-toggle {
     position: absolute;
     top: 20px;
+    right: 35px;
+    z-index: 200;
+}
+
+.header-top {
+    position: absolute;
+    top: 80px;
     right: 30px;
     z-index: 100;
     display: flex;
     gap: 15px;
     align-items: flex-end;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.menu-closed {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-15px);
+}
+
+.menu-open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
 }
 
 .nav-group {
@@ -1014,15 +1034,44 @@ footer a:hover {
     .logo-text { order: 1; margin: 0; font-size: 1.5rem; letter-spacing: 2px; }
     .tagline { order: 2; margin-top: 5px; font-size: 0.75rem; }
 
+    #menu-toggle {
+        position: fixed;
+        top: 20px;
+        right: 30px;
+        z-index: 1000; /* Higher than everything else */
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
+    }
+
     .header-top {
         order: 3;
-        position: static;
-        margin-top: 25px;
+        position: relative;
+        top: auto;
+        right: auto;
+        margin-top: 10px;
         width: 100%;
         display: flex;
         justify-content: center;
         gap: 20px;
+        padding: 0;
+        border-top: 1px solid rgba(255, 0, 0, 0);
+        border-bottom: 1px solid rgba(255, 0, 0, 0);
+        background: rgba(255, 0, 0, 0);
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .menu-closed {
+        /* Already handled by base state on mobile */
+    }
+
+    .menu-open {
+        max-height: 120px;
+        opacity: 1;
         padding: 20px 0;
+        margin-top: 25px;
         border-top: 1px solid rgba(255, 0, 0, 0.4);
         border-bottom: 1px solid rgba(255, 0, 0, 0.4);
         background: rgba(255, 0, 0, 0.05);
