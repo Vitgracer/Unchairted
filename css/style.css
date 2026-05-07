@@ -808,7 +808,7 @@ footer a:hover {
     align-items: center;
 }
 
-.github-link {
+.github-link, .about-link {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -966,9 +966,19 @@ footer a:hover {
 
 @media (max-width: 800px) {
     .header-top {
+        position: absolute;
         top: 12px;
-        right: 12px;
-        gap: 8px;
+        left: 0;
+        right: 0;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        padding: 0 15px;
+        pointer-events: none;
+    }
+
+    .header-top > * {
+        pointer-events: auto;
     }
     
     .ghost-btn {
@@ -978,8 +988,8 @@ footer a:hover {
         letter-spacing: 1px;
     }
 
-    .github-link {
-        width: 30px;
+    .github-link, .about-link {
+        width: 32px;
         padding: 0 !important;
     }
     
