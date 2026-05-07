@@ -883,14 +883,40 @@ footer a:hover {
     color: var(--primary-red);
     background: rgba(255, 0, 0, 0.05);
     border-radius: 8px;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.icon-btn:hover {
+@media (hover: hover) {
+    .icon-btn:hover {
+        background: var(--primary-red);
+        color: #fff !important;
+        box-shadow: 0 0 15px var(--primary-red);
+        transform: translateY(-2px);
+    }
+}
+
+.icon-btn.menu-active {
     background: var(--primary-red);
     color: #fff !important;
-    box-shadow: 0 0 15px var(--primary-red);
-    transform: translateY(-2px);
+    box-shadow: 0 0 20px var(--primary-red);
+}
+
+.icon-btn svg line {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
+}
+
+.menu-active .line-1 {
+    transform: translateY(6px) rotate(45deg);
+}
+
+.menu-active .line-2 {
+    opacity: 0;
+    transform: scaleX(0);
+}
+
+.menu-active .line-3 {
+    transform: translateY(-6px) rotate(-45deg);
 }
 
 .icon-btn svg {

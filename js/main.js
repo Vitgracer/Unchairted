@@ -345,8 +345,16 @@ const menuToggle = document.getElementById('menu-toggle');
 const navMenu = document.getElementById('nav-menu');
 
 menuToggle.addEventListener('click', () => {
-    navMenu.classList.toggle('menu-closed');
-    navMenu.classList.toggle('menu-open');
+    const isOpen = navMenu.classList.contains('menu-open');
+    if (isOpen) {
+        navMenu.classList.add('menu-closed');
+        navMenu.classList.remove('menu-open');
+        menuToggle.classList.remove('menu-active');
+    } else {
+        navMenu.classList.remove('menu-closed');
+        navMenu.classList.add('menu-open');
+        menuToggle.classList.add('menu-active');
+    }
 });
 
 // Close menu when clicking any link inside it
@@ -355,6 +363,7 @@ navMenu.querySelectorAll('a, button').forEach(item => {
         if (item.id !== 'menu-toggle') {
             navMenu.classList.add('menu-closed');
             navMenu.classList.remove('menu-open');
+            menuToggle.classList.remove('menu-active');
         }
     });
 });
@@ -364,6 +373,7 @@ document.addEventListener('click', (e) => {
     if (!navMenu.contains(e.target) && !menuToggle.contains(e.target)) {
         navMenu.classList.add('menu-closed');
         navMenu.classList.remove('menu-open');
+        menuToggle.classList.remove('menu-active');
     }
 });
 window.addEventListener('click', async (e) => {
