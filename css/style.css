@@ -439,7 +439,7 @@ footer {
     border-top: 1px solid rgba(255, 255, 255, 0.05);
     color: rgba(255, 255, 255, 0.4);
     font-size: 11px;
-    padding: 15px 20px 10px 20px;
+    padding: 8px 20px;
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -566,7 +566,7 @@ footer a:hover {
 
     footer {
         flex-direction: column; 
-        padding: 20px 10px calc(10px + env(safe-area-inset-bottom)) 10px;
+        padding: 10px 10px calc(8px + env(safe-area-inset-bottom)) 10px;
         font-size: 9px;
         gap: 8px;
         align-items: center;
@@ -804,17 +804,25 @@ footer a:hover {
     right: 30px;
     z-index: 100;
     display: flex;
-    gap: 12px;
-    align-items: center;
+    gap: 15px;
+    align-items: flex-end;
 }
 
-.github-link, .about-link {
+.nav-group {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    width: 36px;
-    padding: 0 !important;
+    gap: 6px;
+    min-width: 55px;
+}
+
+.nav-label {
+    font-family: 'Syncopate', sans-serif;
+    font-size: 0.5rem;
+    font-weight: 700;
+    color: var(--primary-red);
+    opacity: 0.8;
+    letter-spacing: 1px;
 }
 
 .ghost-btn {
@@ -843,8 +851,40 @@ footer a:hover {
     box-shadow: 0 0 15px rgba(255, 0, 0, 0.2);
 }
 
-/* About Overlay */
-#about-overlay {
+.icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    width: 40px;
+    height: 40px;
+    padding: 0 !important;
+    border: 1px solid var(--primary-red);
+    color: var(--primary-red);
+    background: rgba(255, 0, 0, 0.05);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.icon-btn:hover {
+    background: var(--primary-red);
+    color: #fff !important;
+    box-shadow: 0 0 15px var(--primary-red);
+    transform: translateY(-2px);
+}
+
+.icon-btn svg {
+    display: block;
+    fill: currentColor;
+}
+
+.icon-btn svg[stroke="currentColor"] {
+    stroke: currentColor;
+    fill: none;
+}
+
+/* About & Privacy Overlays */
+#about-overlay, #privacy-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -965,32 +1005,42 @@ footer a:hover {
 }
 
 @media (max-width: 800px) {
+    #app-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 25px 0 0 0;
+    }
+
+    .logo-text { order: 1; margin: 0; font-size: 1.5rem; letter-spacing: 2px; }
+    .tagline { order: 2; margin-top: 5px; font-size: 0.75rem; }
+
     .header-top {
-        position: absolute;
-        top: 12px;
-        left: 0;
-        right: 0;
+        order: 3;
+        position: static;
+        margin-top: 25px;
         width: 100%;
         display: flex;
-        justify-content: space-between;
-        padding: 0 15px;
-        pointer-events: none;
-    }
-
-    .header-top > * {
-        pointer-events: auto;
+        justify-content: center;
+        gap: 20px;
+        padding: 20px 0;
+        border-top: 1px solid rgba(255, 0, 0, 0.4);
+        border-bottom: 1px solid rgba(255, 0, 0, 0.4);
+        background: rgba(255, 0, 0, 0.05);
     }
     
-    .ghost-btn {
-        font-size: 0.5rem;
-        padding: 0 10px;
-        height: 30px;
-        letter-spacing: 1px;
+    .nav-group {
+        gap: 4px;
+        min-width: 50px;
     }
 
-    .github-link, .about-link {
-        width: 32px;
-        padding: 0 !important;
+    .nav-label {
+        font-size: 0.45rem;
+    }
+
+    .icon-btn {
+        width: 34px;
+        height: 34px;
     }
     
     .about-content {
@@ -999,7 +1049,7 @@ footer a:hover {
         max-height: none;
     }
     
-    #about-overlay {
+    #about-overlay, #privacy-overlay {
         align-items: flex-start;
         overflow-y: auto;
         padding: 20px;

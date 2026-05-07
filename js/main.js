@@ -30,6 +30,9 @@ const homeBtn = document.getElementById('home-btn');
 const aboutBtn = document.getElementById('about-btn');
 const aboutOverlay = document.getElementById('about-overlay');
 const aboutCloseBtn = document.getElementById('about-close-btn');
+const privacyBtn = document.getElementById('privacy-btn');
+const privacyOverlay = document.getElementById('privacy-overlay');
+const privacyCloseBtn = document.getElementById('privacy-close-btn');
 
 const game = new GameplayManager();
 let pose;
@@ -324,6 +327,18 @@ aboutBtn.addEventListener('click', () => showElement(aboutOverlay, 'flex'));
 aboutCloseBtn.addEventListener('click', () => hideElement(aboutOverlay));
 aboutOverlay.addEventListener('click', (e) => {
     if (e.target === aboutOverlay) hideElement(aboutOverlay);
+});
+
+privacyBtn.addEventListener('click', () => {
+    showElement(privacyOverlay, 'flex');
+});
+
+privacyCloseBtn.addEventListener('click', () => {
+    hideElement(privacyOverlay);
+});
+
+privacyOverlay.addEventListener('click', (e) => {
+    if (e.target === privacyOverlay) hideElement(privacyOverlay);
 });
 
 // Global interaction listener to start Home Music on first click/tap
