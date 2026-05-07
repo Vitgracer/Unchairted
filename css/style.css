@@ -966,13 +966,21 @@ footer a:hover {
 
 @media (max-width: 800px) {
     .header-top {
-        top: 15px;
-        right: 15px;
+        top: 12px;
+        right: 12px;
+        gap: 8px;
     }
     
     .ghost-btn {
-        font-size: 0.55rem;
-        padding: 6px 12px;
+        font-size: 0.5rem;
+        padding: 0 10px;
+        height: 30px;
+        letter-spacing: 1px;
+    }
+
+    .github-link {
+        width: 30px;
+        padding: 0 !important;
     }
     
     .about-content {
