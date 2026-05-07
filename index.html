@@ -41,6 +41,9 @@
 
     <main id="main-ui">
         <header id="app-header">
+            <div class="header-top">
+                <button id="about-btn" class="ghost-btn">ABOUT</button>
+            </div>
             <h1 class="logo-text">UN<span class="accent-red">CHAIR</span>TED</h1>
             <p class="tagline">STAND UP. MOVE FAST. SCORE HIGH.</p>
         </header>
@@ -154,8 +157,9 @@
         <canvas id="output-canvas"></canvas>
         <div id="game-timer" class="hidden">01:00</div>
         <button id="home-btn" class="home-btn" title="Back to Menu">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
             <span>MENU</span>
         </button>
@@ -184,6 +188,39 @@
             </div>
             <div id="tutorial-instructions"></div>
             <button id="tutorial-ok-btn" class="action-btn">GOT IT!</button>
+        </div>
+    </div>
+
+    <!-- About Modal -->
+    <div id="about-overlay" class="hidden">
+        <div class="about-content">
+            <button id="about-close-btn" class="close-modal-btn">×</button>
+            <h2 class="about-title">WHY UN<span class="accent-red">CHAIR</span>TED?</h2>
+            <div class="about-body">
+                <div class="about-section">
+                    <h3>A PERSONAL STORY 👋</h3>
+                    <p>I'm Vitalii, and I've spent years working as a Computer Vision engineer. After 12-hour coding
+                        marathons in my chair, I could practically hear my spine begging for mercy. "Broken wooden
+                        trough" doesn't even begin to describe the feeling.</p>
+                </div>
+                <div class="about-section">
+                    <h3>THE FIX 🦾</h3>
+                    <p>Stretching felt like a chore, and the gym was too far. So I used my background in AI to turn my
+                        webcam into a personal trainer. We don’t collect any data—everything runs 100% locally in your
+                        browser. Just hit play and get moving. It works on any device with a camera!</p>
+                </div>
+                <div class="about-section highlights">
+                    <div class="highlight-item">
+                        <span class="icon">🔒</span>
+                        <span><strong>100% PRIVATE</strong><br><small>All processing is local.</small></span>
+                    </div>
+                    <div class="highlight-item">
+                        <span class="icon">💚</span>
+                        <span><strong>STAY HEALTHY</strong><br><small>Improve reflexes & posture.</small></span>
+                    </div>
+                </div>
+                <p class="about-footer">"Sitting is the new smoking." — Don't let your chair win. 🪑❌</p>
+            </div>
         </div>
     </div>
 

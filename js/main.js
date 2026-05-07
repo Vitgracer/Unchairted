@@ -27,6 +27,9 @@ const gameOverEl = document.getElementById('game-over');
 const finalScoreEl = document.getElementById('final-score-val');
 const backToMenuBtn = document.getElementById('back-to-menu-btn');
 const homeBtn = document.getElementById('home-btn');
+const aboutBtn = document.getElementById('about-btn');
+const aboutOverlay = document.getElementById('about-overlay');
+const aboutCloseBtn = document.getElementById('about-close-btn');
 
 const game = new GameplayManager();
 let pose;
@@ -315,6 +318,13 @@ homeBtn.addEventListener('click', returnToMenu);
 
 startBtn.addEventListener('click', () => start(GameMode.BUBBLE));
 eggBtn.addEventListener('click', () => start(GameMode.EGG));
+
+// About Modal
+aboutBtn.addEventListener('click', () => showElement(aboutOverlay, 'flex'));
+aboutCloseBtn.addEventListener('click', () => hideElement(aboutOverlay));
+aboutOverlay.addEventListener('click', (e) => {
+    if (e.target === aboutOverlay) hideElement(aboutOverlay);
+});
 
 // Global interaction listener to start Home Music on first click/tap
 window.addEventListener('click', async (e) => {
