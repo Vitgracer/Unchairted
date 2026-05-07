@@ -803,13 +803,26 @@ footer a:hover {
     top: 20px;
     right: 30px;
     z-index: 100;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.github-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    width: 36px;
+    padding: 0 !important;
 }
 
 .ghost-btn {
     background: transparent;
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: var(--text-gray);
-    padding: 8px 16px;
+    padding: 0 16px;
+    height: 36px;
     border-radius: 8px;
     font-family: 'Syncopate', sans-serif;
     font-size: 0.65rem;
@@ -818,6 +831,9 @@ footer a:hover {
     cursor: pointer;
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .ghost-btn:hover {
