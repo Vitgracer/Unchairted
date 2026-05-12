@@ -145,11 +145,8 @@ export async function showTutorial(mode) {
         title.textContent = 'EGG CATCHER';
         gif.src = 'assets/gifs/egg_catcher/tutorial.gif';
         instructions.innerHTML = `
-            <div class="tutorial-hint">
-                <img src="assets/interlock_fingers.png" class="hint-img" alt="Interlock fingers">
-                <span class="hint-label">Interlock fingers to spawn basket</span>
-            </div>
             <ul>
+                <li>Bring <strong>hands together</strong> to spawn basket</li>
                 <li>Catch eggs in the target zones</li>
                 <li>Don't let them break on the floor!</li>
             </ul>
