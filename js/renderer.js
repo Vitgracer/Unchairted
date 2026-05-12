@@ -32,30 +32,30 @@ function drawLine(ctx, p1, p2, color = '#ff0000', width = 4) {
 function drawPoint(ctx, p, color = '#FF0000', radius = 6, glowColor = null) {
     if (!p) return;
     ctx.save();
-    
+
     if (glowColor) {
         ctx.shadowBlur = 15;
         ctx.shadowColor = glowColor;
     }
-    
+
     ctx.beginPath();
     ctx.arc(p.x, p.y, radius, 0, 2 * Math.PI);
     ctx.fillStyle = color;
     ctx.fill();
-    
+
     // Add a small white "highlight" in the center for a 3D effect
     ctx.beginPath();
     ctx.arc(p.x, p.y, radius * 0.4, 0, 2 * Math.PI);
     ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
     ctx.fill();
-    
+
     ctx.restore();
 }
 
 /**
  * Draws a futuristic play area border
  */
-function drawPlayArea(ctx, x, y, size, color = '#ff0000') {
+function drawPlayArea(ctx, x, y, size, color = '#ff0000', hideLabel = false) {
     ctx.save();
 
     // Subtle outer glow
@@ -109,17 +109,19 @@ function drawPlayArea(ctx, x, y, size, color = '#ff0000') {
     ctx.fillRect(x + size, y, ctx.canvas.width - (x + size), size);
 
     // Pulse effect for the play area label
-    const pulse = (Math.sin(Date.now() / 500) + 1) / 2;
-    ctx.font = 'bold 14px Outfit, sans-serif';
-    ctx.fillStyle = `rgba(255, 0, 0, ${0.4 + pulse * 0.6})`;
-    ctx.textAlign = 'center';
+    if (!hideLabel) {
+        const pulse = (Math.sin(Date.now() / 500) + 1) / 2;
+        ctx.font = 'bold 14px Outfit, sans-serif';
+        ctx.fillStyle = `rgba(255, 0, 0, ${0.4 + pulse * 0.6})`;
+        ctx.textAlign = 'center';
 
-    // Un-mirror text (counteracting CSS flip)
-    ctx.save();
-    ctx.translate(x + size / 2, y + size - 10);
-    ctx.scale(-1, 1);
-    ctx.fillText('ACTIVE PLAY ZONE', 0, 0);
-    ctx.restore();
+        // Un-mirror text (counteracting CSS flip)
+        ctx.save();
+        ctx.translate(x + size / 2, y + size - 10);
+        ctx.scale(-1, 1);
+        ctx.fillText('ACTIVE PLAY ZONE', 0, 0);
+        ctx.restore();
+    }
 
     ctx.restore();
 }
@@ -235,14 +237,14 @@ function drawBasket(ctx, basket) {
     ctx.save();
 
     ctx.translate(basket.x, basket.y);
-    
+
     // Un-mirror for the emoji/text
     ctx.save();
     ctx.scale(-1, 1);
 
     const w = basket.width;
     const h = basket.height;
-    
+
     // Draw 🧺 Emoji - increased size
     ctx.font = `${h * 1.4}px serif`;
     ctx.textAlign = 'center';
@@ -250,13 +252,13 @@ function drawBasket(ctx, basket) {
     ctx.fillText('🧺', 0, 0);
 
     // Subtle overlay
-    const grad = ctx.createLinearGradient(0, -h/2, 0, h/2);
+    const grad = ctx.createLinearGradient(0, -h / 2, 0, h / 2);
     grad.addColorStop(0, 'rgba(255, 215, 0, 0.1)');
     grad.addColorStop(1, 'rgba(255, 140, 0, 0.05)');
-    
+
     ctx.fillStyle = grad;
     ctx.beginPath();
-    ctx.ellipse(0, 0, w/2, h/2, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, 0, w / 2, h / 2, 0, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.restore();
@@ -271,29 +273,29 @@ function drawCalibration(ctx, gameplayManager) {
         const timer = gameplayManager.calibrationFinishTimer;
         const alpha = Math.min(1, timer * 2);
         const scale = 0.8 + Math.sin(timer * 10) * 0.1;
-        
+
         ctx.save();
         ctx.translate(ctx.canvas.width / 2, ctx.canvas.height / 2);
         ctx.scale(-scale, scale); // Un-mirror and scale
-        
+
         ctx.font = '900 120px Outfit, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        
+
         // Outer glow
         ctx.shadowBlur = 30;
         ctx.shadowColor = '#00FF00';
-        
+
         ctx.fillStyle = `rgba(0, 255, 0, ${alpha})`;
         ctx.fillText('PASSED', 0, 0);
-        
+
         // Subtle scanline effect on text
         ctx.globalCompositeOperation = 'source-atop';
         ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
         for (let i = -100; i < 100; i += 10) {
             ctx.fillRect(-400, i + (Date.now() % 500) / 50, 800, 2);
         }
-        
+
         ctx.restore();
         return;
     }
@@ -302,6 +304,32 @@ function drawCalibration(ctx, gameplayManager) {
     const hips = gameplayManager.calibrationTargets.filter(t => t.id.includes('Hip'));
     const others = gameplayManager.calibrationTargets.filter(t => !t.id.includes('Hip'));
 
+    // 1. Draw "PLEASE STAND UP!" at the top
+    ctx.save();
+    ctx.translate(ctx.canvas.width / 2, 45);
+    ctx.scale(-1, 1); // Un-mirror text
+
+    // Pulse animation
+    const pulse = (Math.sin(Date.now() / 400) + 1) / 2;
+
+    // Main Text: PLEASE STAND UP!
+    ctx.font = '900 48px Syncopate, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    // White Neon Glow
+    ctx.shadowBlur = 20 + pulse * 15;
+    ctx.shadowColor = '#FFFFFF';
+
+    ctx.fillStyle = '#FFFFFF'; // Pure Glowing White
+    ctx.fillText('PLEASE STAND UP!', 0, 0);
+
+    // Subtext
+    ctx.font = 'bold 14px Outfit, sans-serif';
+    ctx.fillStyle = `rgba(255, 255, 255, ${0.7 + pulse * 0.3})`;
+    ctx.shadowBlur = 0;
+    ctx.restore();
+
     // Draw Others
     others.forEach(target => {
         ctx.save();
@@ -309,30 +337,34 @@ function drawCalibration(ctx, gameplayManager) {
         const pulse = (Math.sin(Date.now() / 300) + 1) / 2;
         ctx.shadowBlur = target.isActive ? 25 : 15;
         ctx.shadowColor = color;
-        
+
         ctx.beginPath();
         ctx.arc(target.x, target.y, target.radius, 0, Math.PI * 2);
         ctx.strokeStyle = color;
         ctx.lineWidth = 4;
         if (!target.isActive) ctx.setLineDash([10, 5]);
         ctx.stroke();
-        
+
         ctx.beginPath();
         ctx.arc(target.x, target.y, target.radius * (0.8 + pulse * 0.1), 0, Math.PI * 2);
         ctx.fillStyle = target.isActive ? `rgba(0, 255, 0, 0.2)` : `rgba(255, 0, 0, ${0.1 + pulse * 0.1})`;
         ctx.fill();
 
         ctx.save();
-        ctx.translate(target.x, target.y - target.radius - 40);
+        ctx.translate(target.x, target.y);
         ctx.scale(-1, 1);
-        ctx.font = 'bold 16px Outfit, sans-serif';
+        ctx.font = 'bold 18px Outfit, sans-serif';
         ctx.fillStyle = 'white';
         ctx.textAlign = 'center';
-        ctx.fillText(target.label, 0, 0);
+        ctx.textBaseline = 'middle';
+        
         if (target.isActive) {
+            ctx.fillText(target.label, 0, -8);
             ctx.font = 'bold 12px Outfit, sans-serif';
             ctx.fillStyle = '#00FF00';
-            ctx.fillText('LOCKED', 0, 15);
+            ctx.fillText('LOCKED', 0, 12);
+        } else {
+            ctx.fillText(target.label, 0, 0);
         }
         ctx.restore();
         ctx.restore();
@@ -357,11 +389,11 @@ function drawCalibration(ctx, gameplayManager) {
         const width = rightX - leftX;
 
         ctx.beginPath();
-        ctx.arc(leftX, h1.y, radius, Math.PI/2, Math.PI * 1.5);
+        ctx.arc(leftX, h1.y, radius, Math.PI / 2, Math.PI * 1.5);
         ctx.lineTo(rightX, h1.y - radius);
-        ctx.arc(rightX, h1.y, radius, -Math.PI/2, Math.PI/2);
+        ctx.arc(rightX, h1.y, radius, -Math.PI / 2, Math.PI / 2);
         ctx.closePath();
-        
+
         // Fill
         ctx.fillStyle = allActive ? 'rgba(0, 255, 0, 0.15)' : (anyActive ? 'rgba(255, 255, 0, 0.1)' : 'rgba(255, 0, 0, 0.05)');
         ctx.fill();
@@ -384,17 +416,20 @@ function drawCalibration(ctx, gameplayManager) {
 
         // Unified Label
         ctx.save();
-        ctx.translate((leftX + rightX) / 2, h1.y - radius - 40);
+        ctx.translate((leftX + rightX) / 2, h1.y);
         ctx.scale(-1, 1);
-        ctx.font = 'bold 18px Outfit, sans-serif';
+        ctx.font = '900 20px Syncopate, sans-serif';
         ctx.fillStyle = 'white';
         ctx.textAlign = 'center';
-        ctx.fillText('HIPS', 0, 0);
+        ctx.textBaseline = 'middle';
         
         if (allActive) {
-            ctx.font = 'bold 12px Outfit, sans-serif';
+            ctx.fillText('HIPS', 0, -10);
+            ctx.font = 'bold 13px Outfit, sans-serif';
             ctx.fillStyle = '#00FF00';
-            ctx.fillText('STABILIZED', 0, 15);
+            ctx.fillText('STABILIZED', 0, 14);
+        } else {
+            ctx.fillText('HIPS', 0, 0);
         }
         ctx.restore();
 
@@ -426,10 +461,13 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
         drawCalibration(ctx, gameplayManager);
     }
 
-    // 1. Draw Gameplay Elements (if active)
+    // 1. Draw Play Area Boundary (if active)
     if (gameplayManager && (gameplayManager.gameStarted || gameplayManager.isCalibrating)) {
-        // Draw Play Area Boundary
-        drawPlayArea(ctx, sx, sy, minDim);
+        drawPlayArea(ctx, sx, sy, minDim, '#ff0000', gameplayManager.isCalibrating);
+    }
+
+    // 2. Draw Gameplay Elements (if active)
+    if (gameplayManager && gameplayManager.gameStarted) {
 
         // Draw Laser (Obstacle)
         if (gameplayManager.laser) {
@@ -553,7 +591,7 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
 
         ctx.shadowBlur = 10;
         ctx.shadowColor = '#ff0000';
-        
+
         // --- SKELETON LINES (Commented out for debug) ---
         /*
         drawLine(ctx, lShoulder, rShoulder);
