@@ -164,6 +164,15 @@ function returnToMenu() {
     isStarted = false;
     game.reset(); // Stop any active game logic
     
+    // Reset duration to default to match UI state
+    selectedDuration = 60;
+    document.querySelectorAll('.timer-selector').forEach(selector => {
+        selector.querySelectorAll('.timer-btn').forEach((btn, idx) => {
+            if (idx === 0) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+    });
+
     hideElement(gameOverEl);
     hideElement(videoContainerEl);
     hideElement(scoreContainerEl);
