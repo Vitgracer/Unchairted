@@ -346,7 +346,7 @@ export class GameplayManager {
                 const dist = Math.sqrt(dx * dx + dy * dy);
 
                 // If hands are close (less than 15% of play area size)
-                if (dist < this.playArea.size * 0.18) {
+                if (dist < this.playArea.size * 0.27) {
                     this.basket = {
                         x: (p1.x + p2.x) / 2,
                         y: (p1.y + p2.y) / 2,
