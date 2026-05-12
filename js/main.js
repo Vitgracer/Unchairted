@@ -39,6 +39,7 @@ let pose;
 let isStarted = false;
 let currentPoseResults = null;
 let handPoints = [];
+let hipPoints = [];
 let headPoint = null;
 let currentPlayArea = null;
 let selectedMode = GameMode.BUBBLE;
@@ -97,9 +98,15 @@ function onPoseResults(results) {
                 getHandCenter([16, 18, 20, 22])  // Right
             ].filter(p => p !== null);
 
+            hipPoints = [
+                mapLM(lms[23]), // Left Hip
+                mapLM(lms[24])  // Right Hip
+            ];
+
             headPoint = mapLM(lms[0]); // Nose as head center
         } else {
             handPoints = [];
+            hipPoints = [];
             headPoint = null;
         }
     }
@@ -134,7 +141,7 @@ function renderLoop(now) {
         lastFrameTime = now;
 
         if (game.isCalibrating) {
-            game.updateCalibration(headPoint, handPoints);
+            game.updateCalibration(headPoint, handPoints, hipPoints, deltaTime);
         }
 
         if (game.gameStarted) {
@@ -219,6 +226,7 @@ async function start(mode) {
     // Clear old data to prevent "ghost" poses from previous games
     currentPoseResults = null;
     handPoints = [];
+    hipPoints = [];
     headPoint = null;
 
     try {
@@ -271,11 +279,6 @@ async function start(mode) {
             };
             checkCalibration();
         });
-
-        if (!isStarted) return;
-
-        setStatus(statusEl, 'LOCKED IN!');
-        await new Promise(r => setTimeout(r, 800));
 
         if (!isStarted) return;
 

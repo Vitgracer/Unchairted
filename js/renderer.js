@@ -266,50 +266,140 @@ function drawBasket(ctx, basket) {
 function drawCalibration(ctx, gameplayManager) {
     if (!gameplayManager || !gameplayManager.isCalibrating) return;
 
-    gameplayManager.calibrationTargets.forEach(target => {
-        ctx.save();
+    if (gameplayManager.calibrationPassed) {
+        // Draw PASSED animation
+        const timer = gameplayManager.calibrationFinishTimer;
+        const alpha = Math.min(1, timer * 2);
+        const scale = 0.8 + Math.sin(timer * 10) * 0.1;
         
-        const color = target.isActive ? '#00FF00' : '#FF0000';
-        const pulse = (Math.sin(Date.now() / 300) + 1) / 2;
+        ctx.save();
+        ctx.translate(ctx.canvas.width / 2, ctx.canvas.height / 2);
+        ctx.scale(-scale, scale); // Un-mirror and scale
+        
+        ctx.font = '900 120px Outfit, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
         
         // Outer glow
+        ctx.shadowBlur = 30;
+        ctx.shadowColor = '#00FF00';
+        
+        ctx.fillStyle = `rgba(0, 255, 0, ${alpha})`;
+        ctx.fillText('PASSED', 0, 0);
+        
+        // Subtle scanline effect on text
+        ctx.globalCompositeOperation = 'source-atop';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+        for (let i = -100; i < 100; i += 10) {
+            ctx.fillRect(-400, i + (Date.now() % 500) / 50, 800, 2);
+        }
+        
+        ctx.restore();
+        return;
+    }
+
+    // Separate hips to draw them as a unified "Core Zone"
+    const hips = gameplayManager.calibrationTargets.filter(t => t.id.includes('Hip'));
+    const others = gameplayManager.calibrationTargets.filter(t => !t.id.includes('Hip'));
+
+    // Draw Others
+    others.forEach(target => {
+        ctx.save();
+        const color = target.isActive ? '#00FF00' : '#FF0000';
+        const pulse = (Math.sin(Date.now() / 300) + 1) / 2;
         ctx.shadowBlur = target.isActive ? 25 : 15;
         ctx.shadowColor = color;
         
-        // Main circle
         ctx.beginPath();
         ctx.arc(target.x, target.y, target.radius, 0, Math.PI * 2);
         ctx.strokeStyle = color;
         ctx.lineWidth = 4;
-        if (!target.isActive) {
-            ctx.setLineDash([10, 5]);
-        }
+        if (!target.isActive) ctx.setLineDash([10, 5]);
         ctx.stroke();
         
-        // Inner pulse
         ctx.beginPath();
         ctx.arc(target.x, target.y, target.radius * (0.8 + pulse * 0.1), 0, Math.PI * 2);
         ctx.fillStyle = target.isActive ? `rgba(0, 255, 0, 0.2)` : `rgba(255, 0, 0, ${0.1 + pulse * 0.1})`;
         ctx.fill();
 
-        // Label
         ctx.save();
-        ctx.translate(target.x, target.y + target.radius + 25);
-        ctx.scale(-1, 1); // Un-mirror
+        ctx.translate(target.x, target.y - target.radius - 40);
+        ctx.scale(-1, 1);
         ctx.font = 'bold 16px Outfit, sans-serif';
         ctx.fillStyle = 'white';
         ctx.textAlign = 'center';
         ctx.fillText(target.label, 0, 0);
-        
         if (target.isActive) {
             ctx.font = 'bold 12px Outfit, sans-serif';
             ctx.fillStyle = '#00FF00';
             ctx.fillText('LOCKED', 0, 15);
         }
         ctx.restore();
-
         ctx.restore();
     });
+
+    // Draw Hips as a unified Capsule (Cyber Belt)
+    if (hips.length === 2) {
+        const [h1, h2] = hips;
+        const allActive = h1.isActive && h2.isActive;
+        const anyActive = h1.isActive || h2.isActive;
+        const color = allActive ? '#00FF00' : (anyActive ? '#FFFF00' : '#FF0000');
+        const pulse = (Math.sin(Date.now() / 300) + 1) / 2;
+
+        ctx.save();
+        ctx.shadowBlur = anyActive ? 20 : 10;
+        ctx.shadowColor = color;
+
+        // Draw unified background (Pill/Capsule shape)
+        const radius = h1.radius;
+        const leftX = Math.min(h1.x, h2.x);
+        const rightX = Math.max(h1.x, h2.x);
+        const width = rightX - leftX;
+
+        ctx.beginPath();
+        ctx.arc(leftX, h1.y, radius, Math.PI/2, Math.PI * 1.5);
+        ctx.lineTo(rightX, h1.y - radius);
+        ctx.arc(rightX, h1.y, radius, -Math.PI/2, Math.PI/2);
+        ctx.closePath();
+        
+        // Fill
+        ctx.fillStyle = allActive ? 'rgba(0, 255, 0, 0.15)' : (anyActive ? 'rgba(255, 255, 0, 0.1)' : 'rgba(255, 0, 0, 0.05)');
+        ctx.fill();
+
+        // Stroke
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 4;
+        if (!allActive) ctx.setLineDash([15, 8]);
+        ctx.stroke();
+
+        // Inner pulses at hip points
+        hips.forEach(h => {
+            if (h.isActive) {
+                ctx.beginPath();
+                ctx.arc(h.x, h.y, radius * 0.4, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0, 255, 0, 0.3)';
+                ctx.fill();
+            }
+        });
+
+        // Unified Label
+        ctx.save();
+        ctx.translate((leftX + rightX) / 2, h1.y - radius - 40);
+        ctx.scale(-1, 1);
+        ctx.font = 'bold 18px Outfit, sans-serif';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.fillText('HIPS', 0, 0);
+        
+        if (allActive) {
+            ctx.font = 'bold 12px Outfit, sans-serif';
+            ctx.fillStyle = '#00FF00';
+            ctx.fillText('STABILIZED', 0, 15);
+        }
+        ctx.restore();
+
+        ctx.restore();
+    }
 }
 
 export function drawPose(ctx, results, video, canvas, gameplayManager = null) {

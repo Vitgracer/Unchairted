@@ -244,18 +244,32 @@ export class GameplayManager {
             this.playArea = playArea;
         }
         this.isCalibrating = true;
+        this.calibrationPassed = false;
+        this.calibrationFinishTimer = 0;
+        
         const { minX, maxX, minY, size } = this.playArea;
         const centerX = minX + size / 2;
         
         this.calibrationTargets = [
-            { id: 'head', x: centerX, y: minY + size * 0.40, radius: 120, isActive: false, label: 'HEAD' },
-            { id: 'leftHand', x: maxX - size * 0.2, y: minY + size * 0.65, radius: 100, isActive: false, label: 'LEFT HAND' },
-            { id: 'rightHand', x: minX + size * 0.2, y: minY + size * 0.65, radius: 100, isActive: false, label: 'RIGHT HAND' }
+            { id: 'head', x: centerX, y: minY + size * 0.25, radius: 80, isActive: false, label: 'HEAD' },
+            { id: 'leftHand', x: maxX - size * 0.2, y: minY + size * 0.60, radius: 65, isActive: false, label: 'LEFT HAND' },
+            { id: 'rightHand', x: minX + size * 0.2, y: minY + size * 0.60, radius: 65, isActive: false, label: 'RIGHT HAND' },
+            { id: 'leftHip', x: centerX + size * 0.08, y: minY + size * 0.85, radius: 85, isActive: false, label: 'LEFT HIP' },
+            { id: 'rightHip', x: centerX - size * 0.08, y: minY + size * 0.85, radius: 85, isActive: false, label: 'RIGHT HIP' }
         ];
     }
 
-    updateCalibration(headPoint, handPoints) {
+    updateCalibration(headPoint, handPoints, hipPoints = null, dt = 1/60) {
         if (!this.isCalibrating) return;
+
+        // If calibration is already passed, just update the timer
+        if (this.calibrationPassed) {
+            this.calibrationFinishTimer += dt;
+            if (this.calibrationFinishTimer > 1.5) {
+                this.isCalibrating = false;
+            }
+            return;
+        }
 
         let allActive = true;
         this.calibrationTargets.forEach(target => {
@@ -263,9 +277,14 @@ export class GameplayManager {
             if (target.id === 'head' && headPoint) {
                 const dist = Math.sqrt((headPoint.x - target.x)**2 + (headPoint.y - target.y)**2);
                 if (dist < target.radius) active = true;
-            } else if (handPoints) {
+            } else if (target.id.includes('Hand') && handPoints) {
                 handPoints.forEach(hand => {
                     const dist = Math.sqrt((hand.x - target.x)**2 + (hand.y - target.y)**2);
+                    if (dist < target.radius) active = true;
+                });
+            } else if (target.id.includes('Hip') && hipPoints) {
+                hipPoints.forEach(hip => {
+                    const dist = Math.sqrt((hip.x - target.x)**2 + (hip.y - target.y)**2);
                     if (dist < target.radius) active = true;
                 });
             }
@@ -274,7 +293,9 @@ export class GameplayManager {
         });
 
         if (allActive) {
-            this.isCalibrating = false;
+            this.calibrationPassed = true;
+            this.calibrationFinishTimer = 0;
+            audio.play('pop', 1.0); // Success sound
         }
     }
 
