@@ -306,7 +306,8 @@ function drawCalibration(ctx, gameplayManager) {
 
     // 1. Draw "PLEASE STAND UP!" at the top
     ctx.save();
-    ctx.translate(ctx.canvas.width / 2, 45);
+    const minY = (gameplayManager.playArea && gameplayManager.playArea.minY !== undefined) ? gameplayManager.playArea.minY : 0;
+    ctx.translate(ctx.canvas.width / 2, minY + 45);
     ctx.scale(-1, 1); // Un-mirror text
 
     // Pulse animation
