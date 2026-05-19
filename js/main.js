@@ -33,6 +33,7 @@ const aboutCloseBtn = document.getElementById('about-close-btn');
 const privacyBtn = document.getElementById('privacy-btn');
 const privacyOverlay = document.getElementById('privacy-overlay');
 const privacyCloseBtn = document.getElementById('privacy-close-btn');
+const interlockOverlayEl = document.getElementById('interlock-overlay');
 
 const game = new GameplayManager();
 let pose;
@@ -187,6 +188,7 @@ function returnToMenu() {
     hideElement(fpsOverlayEl);
     hideElement(statusEl);
     hideElement(countdownEl);
+    hideElement(interlockOverlayEl);
     gameTimerEl.classList.remove('timer-critical');
     
     showElement(mainUiEl);
@@ -265,7 +267,7 @@ async function start(mode) {
         
         // Calibration Phase
         setStatus(statusEl, 'ALIGN YOURSELF');
-        game.startCalibration(currentPlayArea);
+        game.startCalibration(currentPlayArea, selectedMode);
         
         // Wait for calibration to complete
         await new Promise((resolve) => {
@@ -279,6 +281,15 @@ async function start(mode) {
             };
             checkCalibration();
         });
+
+        if (!isStarted) return;
+
+        if (selectedMode === GameMode.EGG) {
+            hideElement(statusEl);
+            showElement(interlockOverlayEl, 'flex');
+            await new Promise(r => setTimeout(r, 3000));
+            hideElement(interlockOverlayEl);
+        }
 
         if (!isStarted) return;
 

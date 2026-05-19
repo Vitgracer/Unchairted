@@ -247,9 +247,12 @@ export class GameplayManager {
         }
     }
 
-    startCalibration(playArea = null) {
+    startCalibration(playArea = null, mode = null) {
         if (playArea) {
             this.playArea = playArea;
+        }
+        if (mode) {
+            this.mode = mode;
         }
         this.isCalibrating = true;
         this.calibrationPassed = false;

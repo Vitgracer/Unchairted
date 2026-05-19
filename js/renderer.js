@@ -674,7 +674,7 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
         drawLine(ctx, rKnee, rAnkle);
         */
 
-        if (gameplayManager && gameplayManager.mode === GameMode.BUBBLE) {
+        if (gameplayManager && (gameplayManager.mode === GameMode.BUBBLE || gameplayManager.isCalibrating)) {
             ctx.shadowColor = '#ff0000';
             drawPoint(ctx, head, '#ff0000', 12, '#ff0000'); // Larger neon red head
         }
