@@ -516,7 +516,72 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
             // 3. OPTIMIZED LASER (Smooth gradients, no expensive shadows)
             const time = Date.now();
             const pulseAlpha = 0.7 + Math.sin(time / 200) * 0.3; // Light pulsing for visibility
+            const warningPulse = (Math.sin(time / 150) + 1) / 2; // Faster pulsing for danger alert
 
+            // --- A. DANGER AMBIENT RED ALARM TINT & BORDER ---
+            // Pulsing full-screen red warning overlay tint to make the danger extremely noticeable
+            ctx.save();
+            ctx.fillStyle = `rgba(255, 0, 0, ${0.07 * warningPulse})`;
+            ctx.fillRect(sx, sy, minDim, minDim);
+
+            // Double-layered pulsing red warning border
+            ctx.strokeStyle = `rgba(255, 0, 0, ${0.12 * warningPulse})`;
+            ctx.lineWidth = 14;
+            ctx.strokeRect(sx, sy, minDim, minDim);
+            ctx.strokeStyle = `rgba(255, 0, 0, ${0.25 * warningPulse})`;
+            ctx.lineWidth = 4;
+            ctx.strokeRect(sx, sy, minDim, minDim);
+            ctx.restore();
+
+            // --- B. NEON DOTTED GUIDE LINE (Full width) ---
+            // Indicates the exact height of the incoming laser across the whole screen
+            ctx.save();
+            ctx.strokeStyle = `rgba(255, 0, 0, ${0.15 + warningPulse * 0.2})`;
+            ctx.lineWidth = 2;
+            ctx.setLineDash([8, 6]);
+            ctx.beginPath();
+            ctx.moveTo(sx, laser.y);
+            ctx.lineTo(sx + minDim, laser.y);
+            ctx.stroke();
+            ctx.restore();
+
+            // --- C. FLASHING WARNING BANNER & SIDE TAGS ---
+            // 1. Giant alert banner at the top of the play zone
+            ctx.save();
+            ctx.fillStyle = `rgba(0, 0, 0, ${0.45 * warningPulse})`;
+            ctx.fillRect(sx, sy + minDim * 0.08, minDim, 50);
+
+            ctx.font = '900 20px Syncopate, sans-serif';
+            ctx.fillStyle = `rgba(255, 0, 0, ${0.5 + warningPulse * 0.5})`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.translate(sx + minDim / 2, sy + minDim * 0.08 + 25);
+            ctx.scale(-1, 1); // Un-mirror
+            ctx.fillText('⚠️ LASER WARNING ⚠️', 0, 0);
+            ctx.restore();
+
+            // 2. Flashing duck! side tags at the height of the laser
+            ctx.save();
+            ctx.font = '900 12px Syncopate, sans-serif';
+            ctx.fillStyle = `rgba(255, 0, 0, ${0.4 + warningPulse * 0.6})`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            const warningXPositions = [
+                sx + 50,            // Left edge
+                sx + minDim - 50    // Right edge
+            ];
+
+            warningXPositions.forEach(x => {
+                ctx.save();
+                ctx.translate(x, laser.y);
+                ctx.scale(-1, 1); // Un-mirror text for legibility
+                ctx.fillText('⚠️ DUCK!', 0, 0);
+                ctx.restore();
+            });
+            ctx.restore();
+
+            // --- D. THE LASER BEAM ITSELF ---
             // --- Outer Glow (Massive Vertical Gradient - very fast) ---
             const glowHeight = 100; // Increased for maximum visibility on mobile
             const outerGrad = ctx.createLinearGradient(laser.x, laser.y - glowHeight / 2, laser.x, laser.y + glowHeight / 2);
