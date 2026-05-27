@@ -8,25 +8,29 @@
 
 ![Unchairted Banner](assets/logo_cut.png)
 
-### "My back feels like a broken wooden trough." — Every developer, ever.
+### 💬 Around 60–80% of office workers report back or neck pain related to prolonged computer use.
 
-## 🧠 The Motivation
-Look, I get it. You're a developer, a designer, or some other flavor of "keyboard warrior." You spend 12+ hours a day glued to your chair. By the time you stand up, your spine feels like a bag of dry spaghetti that’s been stepped on. 🍝
+## 🎯 The Motivation
+You're a developer, a designer, or some other flavor of "desk-bound professional." You spend **12+** hours a day glued to your chair. By the time you stand up, your spine feels like a bag of dry spaghetti that’s been stepped on.
 
-Sure, you *could* do some "boring" stretches. But as a Computer Vision engineer, I figured: why settle for boring when I can turn my webcam into a personal trainer that judges my reflexes? 
+Sure, you *could* do some "boring" stretches. But as a Computer Vision engineer, I figured: why settle for boring when I can turn my webcamera into a personal trainer that judges my reflexes? 
 
 That’s how **UNCHAIRTED** was born. It’s not just a game; it’s an intervention for your posture.
 
 ## 💀 The "Sitting is Killing You" Part
-This isn't just me being dramatic. According to the **Mayo Clinic**, sitting for more than 8 hours a day with no physical activity carries a risk of death similar to that of **obesity and smoking**. 
+This isn't just me being dramatic. According to the [**Mayo Clinic**](https://sportsmedicine.mayoclinic.org/news/risks-of-sitting-too-much/), sitting for more than 8 hours a day with no physical activity carries a risk of death similar to that of **obesity and smoking**. 
 
 Your chair is basically a slow-motion trap. **Don't let it win.** 🪑❌
 
 ## 🎮 What we’re offering
-UNCHAIRTED is a web-based movement game that turns your body into the controller. 
-*   **100% Local**: No servers, no data-hoarding, no "we're watching you." All processing happens in your browser via MediaPipe.
+UNCHAIRTED is a web-based movement game that turns your body into the **controller**. 
+*   **100% Local**: No servers, no data-storing, no "we're watching you." All processing happens in your browser via MediaPipe.
 *   **Zero Install**: If you have a browser, you have a gym.
 *   **High Energy**: All you need is a webcam and a pair of headphones for the sick beats.
+
+<p align="left">
+  <img src="assets/body_controller.png" width="50%" />
+</p>
 
 ### Game Modes (More coming soon!)
 
