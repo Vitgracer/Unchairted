@@ -70,13 +70,13 @@ Remember that classic handheld game where the wolf catches eggs? (Yeah, the Sovi
 ## 🩺 The Health Check (Muscle Map)
 Playing this isn't just for points; it's for your gains.
 
-| Mode | Muscles Worked | Exercise Preview |
-|------|----------------|------------------|
-| **Bubble Hunter** | Deltoids, Traps, Obliques, Quads/Glutes | ![Bubble Hunter Muscles](assets/health_bubble.png) |
-| **Egg Catcher** | Reflexes, Core Stability, Lower Body, Lower Back | ![Egg Catcher Muscles](assets/health_egg.png) |
+| Mode | Muscles Worked | 
+|------|----------------|
+| **Bubble Hunter** | Deltoids, Traps, Obliques, Quads/Glutes | 
+| **Egg Catcher** | Reflexes, Core Stability, Lower Body, Lower Back | 
 
 > [!TIP]
-> It's basically a HIIT session disguised as a browser game. Great for kids too—keeps them moving instead of slouching!
+> It's basically a HIIT session disguised as a browser game. Great for kids too — keeps them moving instead of slouching!
 
 
 ## 💎 Why you’ll love it
