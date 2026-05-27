@@ -32,6 +32,17 @@ UNCHAIRTED is a web-based movement game that turns your body into the **controll
   <img src="assets/body_controller.png" width="50%" />
 </p>
 
+## 🔍 Calibration: Set Up for Success
+Before jumping into any game, you need to calibrate the pose tracking system. This ensures that the model accurately maps your body parts and alignment zones.
+
+1. **Step Back**: Place your webcam so it can capture your entire upper body (ideally from head to hips).
+2. **Align the Targets**: Stand in the frame and match your head, hands, and hips with the respective circular target zones on the screen.
+3. **Hold Still**: Hold your position until the indicators turn green and you see the glowing **PASSED** message.
+
+<p align="left">
+  <img src="assets/gifs/calibration/calibration.gif" width="25%" alt="Calibration Guide" />
+</p>
+
 ### Game Modes (More coming soon!)
 
 #### 🧼 Mode 1: Bubble Hunter
@@ -41,11 +52,20 @@ The sky is falling, and it's made of soap.
 *   **The Threat**: A giant red laser will occasionally sweep the screen. If you don't **DUCK**, you lose 50 points and your dignity. 
 *   **Scoring**: Pop = +10 | Miss = -10 | Laser Hit = -50.
 
+<p align="left">
+  <img src="assets/gifs/gameplay_buble_hunter/gameplay_buble_hunter.gif" width="25%" alt="Bubble Hunter Gameplay" />
+</p>
+
 #### 🥚 Mode 2: Egg Catcher
 Remember that classic handheld game where the wolf catches eggs? (Yeah, the Soviet "Nu, Pogodi!" one). It’s that, but you're the wolf.
 *   **The Goal**: Use your hands to control a virtual basket and catch eggs falling from four different chutes.
 *   **The Catch**: Eggs are fragile. If they hit the floor, it’s a mess and a penalty.
 *   **Scoring**: Catch = +10 | Break = -10.
+
+<p align="left">
+  <img src="assets/gifs/spawn_busket/spawn_busket.gif" width="25%" />
+  <img src="assets/gifs/gameplay_egg_catcher/gameplay_egg_catcher.gif" width="25%" />
+</p>
 
 ## 🩺 The Health Check (Muscle Map)
 Playing this isn't just for points; it's for your gains.
