@@ -29,7 +29,7 @@ UNCHAIRTED is a web-based movement game that turns your body into the **controll
 *   **High Energy**: All you need is a webcam and a pair of headphones for the sick beats.
 
 <p align="left">
-  <img src="assets/body_controller.png" width="50%" />
+  <img src="assets/body_controller.png" width="70%" />
 </p>
 
 ## 🔍 Calibration: Set Up for Success
@@ -40,7 +40,7 @@ Before jumping into any game, you need to calibrate the pose tracking system. Th
 3. **Hold Still**: Hold your position until the indicators turn green and you see the glowing **PASSED** message.
 
 <p align="left">
-  <img src="assets/gifs/calibration/calibration.gif" width="25%" alt="Calibration Guide" />
+  <img src="assets/gifs/calibration/calibration.gif" width="50%" alt="Calibration Guide" />
 </p>
 
 ### Game Modes (More coming soon!)
@@ -53,7 +53,7 @@ The sky is falling, and it's made of soap.
 *   **Scoring**: Pop = +10 | Miss = -10 | Laser Hit = -50.
 
 <p align="left">
-  <img src="assets/gifs/gameplay_buble_hunter/gameplay_buble_hunter.gif" width="25%" alt="Bubble Hunter Gameplay" />
+  <img src="assets/gifs/gameplay_buble_hunter/gameplay_buble_hunter.gif" width="50%" alt="Bubble Hunter Gameplay" />
 </p>
 
 #### 🥚 Mode 2: Egg Catcher
@@ -63,8 +63,8 @@ Remember that classic handheld game where the wolf catches eggs? (Yeah, the Sovi
 *   **Scoring**: Catch = +10 | Break = -10.
 
 <p align="left">
-  <img src="assets/gifs/spawn_busket/spawn_busket.gif" width="25%" />
-  <img src="assets/gifs/gameplay_egg_catcher/gameplay_egg_catcher.gif" width="25%" />
+  <img src="assets/gifs/spawn_busket/spawn_busket.gif" width="50%" />
+  <img src="assets/gifs/gameplay_egg_catcher/gameplay_egg_catcher.gif" width="50%" />
 </p>
 
 ## 🩺 The Health Check (Muscle Map)
