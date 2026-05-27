@@ -29,7 +29,7 @@ UNCHAIRTED is a web-based movement game that turns your body into the **controll
 *   **High Energy**: All you need is a webcam and a pair of headphones for the sick beats.
 
 <p align="left">
-  <img src="assets/body_controller.png" width="70%" />
+  <img src="assets/body_controller.png" width="90%" />
 </p>
 
 ## 🔍 Calibration: Set Up for Success
@@ -63,8 +63,8 @@ Remember that classic handheld game where the wolf catches eggs? (Yeah, the Sovi
 *   **Scoring**: Catch = +10 | Break = -10.
 
 <p align="left">
-  <img src="assets/gifs/spawn_busket/spawn_busket.gif" width="50%" />
-  <img src="assets/gifs/gameplay_egg_catcher/gameplay_egg_catcher.gif" width="50%" />
+  <img src="assets/gifs/spawn_busket/spawn_busket.gif" width="40%" />
+  <img src="assets/gifs/gameplay_egg_catcher/gameplay_egg_catcher.gif" width="40%" />
 </p>
 
 ## 🩺 The Health Check (Muscle Map)
