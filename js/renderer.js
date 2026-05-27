@@ -18,6 +18,50 @@ function getCenterOfMass(landmarks, indices) {
     return { x: x / count, y: y / count, z: z / count };
 }
 
+function getFaceCircle(landmarks, mapLM) {
+    if (!landmarks) return null;
+    let xSum = 0, ySum = 0, count = 0;
+    const faceIndices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const points = [];
+    
+    faceIndices.forEach(idx => {
+        if (landmarks[idx]) {
+            const pt = mapLM(landmarks[idx]);
+            if (pt && !isNaN(pt.x) && !isNaN(pt.y)) {
+                xSum += pt.x;
+                ySum += pt.y;
+                count++;
+                points.push(pt);
+            }
+        }
+    });
+
+    if (count === 0) return null;
+
+    const center = { x: xSum / count, y: ySum / count };
+    let radius = 40; // fallback
+
+    if (landmarks[7] && landmarks[8]) {
+        const p7 = mapLM(landmarks[7]);
+        const p8 = mapLM(landmarks[8]);
+        if (p7 && p8 && !isNaN(p7.x) && !isNaN(p8.x)) {
+            const earDist = Math.sqrt((p7.x - p8.x) ** 2 + (p7.y - p8.y) ** 2);
+            radius = earDist * 0.75;
+        }
+    } else {
+        let maxDist = 0;
+        points.forEach(pt => {
+            const dist = Math.sqrt((pt.x - center.x) ** 2 + (pt.y - center.y) ** 2);
+            if (dist > maxDist) maxDist = dist;
+        });
+        radius = Math.max(30, maxDist * 1.5);
+    }
+
+    if (isNaN(center.x) || isNaN(center.y) || isNaN(radius)) return null;
+
+    return { center, radius };
+}
+
 function drawLine(ctx, p1, p2, color = '#ff0000', width = 4) {
     if (!p1 || !p2) return;
     ctx.beginPath();
@@ -442,6 +486,15 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
     ctx.save();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // Guard against zero dimensions
+    if (!video || video.videoWidth === 0 || video.videoHeight === 0) {
+        ctx.restore();
+        return;
+    }
+
+    // Draw the video frame onto the canvas
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
     // 1. Draw Gameplay Elements (if active)
     const vWidth = video.videoWidth;
     const vHeight = video.videoHeight;
@@ -454,6 +507,48 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
         x: (lm.x * minDim + sx) / vWidth * canvas.width,
         y: (lm.y * minDim + sy) / vHeight * canvas.height
     }) : null;
+
+    // Blur the face region if landmarks are available
+    if (lms && mapLM) {
+        const face = getFaceCircle(lms, mapLM);
+        if (face) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(face.center.x, face.center.y, face.radius, 0, Math.PI * 2);
+            ctx.clip();
+
+            // Pixelated/mosaic effect using offscreen canvas downscaling
+            let sx = face.center.x - face.radius;
+            let sy = face.center.y - face.radius;
+            let sWidth = face.radius * 2;
+            let sHeight = face.radius * 2;
+
+            const vW = video.videoWidth;
+            const vH = video.videoHeight;
+            
+            // Clamp crop coordinates within video dimensions to prevent errors
+            if (sx < 0) { sWidth += sx; sx = 0; }
+            if (sy < 0) { sHeight += sy; sy = 0; }
+            if (sx + sWidth > vW) sWidth = vW - sx;
+            if (sy + sHeight > vH) sHeight = vH - sy;
+
+            if (sWidth > 0 && sHeight > 0) {
+                const offscreen = document.createElement('canvas');
+                offscreen.width = 8;
+                offscreen.height = 8;
+                const oCtx = offscreen.getContext('2d');
+
+                oCtx.drawImage(video, sx, sy, sWidth, sHeight, 0, 0, 8, 8);
+
+                ctx.imageSmoothingEnabled = false;
+                ctx.mozImageSmoothingEnabled = false;
+                ctx.webkitImageSmoothingEnabled = false;
+                
+                ctx.drawImage(offscreen, 0, 0, 8, 8, sx, sy, sWidth, sHeight);
+            }
+            ctx.restore();
+        }
+    }
 
     const headPoint = (lms && mapLM) ? mapLM(lms[0]) : null;
 

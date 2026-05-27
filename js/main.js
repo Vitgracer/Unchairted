@@ -1,3 +1,20 @@
+window.addEventListener('error', (event) => {
+    const errorDiv = document.createElement('div');
+    errorDiv.style.position = 'fixed';
+    errorDiv.style.top = '0';
+    errorDiv.style.left = '0';
+    errorDiv.style.width = '100%';
+    errorDiv.style.background = 'rgba(255,0,0,0.9)';
+    errorDiv.style.color = 'white';
+    errorDiv.style.zIndex = '99999';
+    errorDiv.style.padding = '10px';
+    errorDiv.style.fontFamily = 'monospace';
+    errorDiv.style.fontSize = '12px';
+    errorDiv.style.wordBreak = 'break-all';
+    errorDiv.innerHTML = `<strong>JS Error:</strong> ${event.message} at ${event.filename}:${event.lineno}:${event.colno}`;
+    document.body.appendChild(errorDiv);
+});
+
 import { initCamera, handleResize } from './camera.js';
 import { initPose, processFrame } from './pose.js';
 import { drawPose } from './renderer.js';
@@ -313,6 +330,7 @@ async function start(mode) {
 
     } catch (err) {
         console.error('Camera Error:', err);
+        alert('CRITICAL ERROR:\n' + (err.stack || err.message || err));
         let errorMsg = err.message;
         setStatus(statusEl, `<span style="color: #ff0000; font-weight: bold;">CRITICAL ERROR: ${err.name}</span><br><small style="color: #fff;">${errorMsg}</small>`, true);
         showElement(mainUiEl);

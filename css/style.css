@@ -295,6 +295,11 @@ video, canvas {
     transform: scaleX(-1);
 }
 
+#input-video {
+    opacity: 0;
+    pointer-events: none;
+}
+
 /* Overlays */
 #fps-overlay {
     position: fixed;
