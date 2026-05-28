@@ -4,7 +4,14 @@
 ![Stars](https://img.shields.io/github/stars/Vitgracer/Unchairted?color=F59F00&label=Stars&style=flat-square)
 ![Forks](https://img.shields.io/github/forks/Vitgracer/Unchairted?color=E03131&label=Forks&style=flat-square)
 
+
 # 🪑 UNCHAIRTED: Stop Sitting
+
+<p align="left">
+  <a href="https://vitgracer.github.io/Unchairted/" target="_blank">
+    <img src="https://img.shields.io/badge/🎮%20PLAY%20UNCHAIRTED%20NOW-Click%20Here%20to%20Start%20⚡-success?style=for-the-badge&logo=google-chrome&logoColor=white&color=FF5733&labelColor=1E1E24" alt="Play Unchairted Now" height="50"/>
+  </a>
+</p>
 
 ![Unchairted Banner](assets/logo_cut.png)
 
