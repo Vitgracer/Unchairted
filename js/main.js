@@ -2,8 +2,9 @@ import { initCamera, handleResize } from './camera.js';
 import { initPose, processFrame } from './pose.js';
 import { drawPose } from './renderer.js';
 import { setStatus, updateFPS, hideElement, showElement, runCountdown, updateScore, updateTimer, showGameOver, showTutorial } from './ui.js';
-import { GameplayManager, GameMode } from './gameplay.js';
+import { GameplayManager } from './gameplay.js';
 import { audio } from './audio.js';
+import { gamesRegistry } from './games/registry.js';
 
 const video = document.getElementById('input-video');
 const canvas = document.getElementById('output-canvas');
@@ -11,8 +12,6 @@ const ctx = canvas.getContext('2d');
 const hiddenCanvas = document.getElementById('hidden-canvas');
 const hiddenCtx = hiddenCanvas.getContext('2d');
 const menuContainer = document.getElementById('menu-container');
-const startBtn = document.getElementById('start-btn');
-const eggBtn = document.getElementById('egg-btn');
 const statusEl = document.getElementById('status');
 
 const poseFpsEl = document.getElementById('pose-fps');
@@ -43,7 +42,7 @@ let handPoints = [];
 let hipPoints = [];
 let headPoint = null;
 let currentPlayArea = null;
-let selectedMode = GameMode.BUBBLE;
+let selectedGame = gamesRegistry.find(g => !g.locked);
 let selectedDuration = 60; // default 1 min
 let gameOverShown = false;
 
@@ -120,7 +119,6 @@ async function loop() {
 }
 
 function renderLoop(now) {
-    // 1. Always update play area if video is ready, to keep game & renderer in sync
     const vWidth = video.videoWidth;
     const vHeight = video.videoHeight;
     if (vWidth > 0 && vHeight > 0) {
@@ -150,9 +148,8 @@ function renderLoop(now) {
             updateScore(scoreValEl, game.getScore());
             updateTimer(gameTimerEl, game.remainingTime);
         } else if (isStarted && !game.gameStarted && !gameOverShown && game.remainingTime === 0 && !game.isCalibrating) {
-            // Game just ended
             gameOverShown = true;
-            showGameOver(gameOverEl, finalScoreEl, game.getScore(), game.stats, game.mode);
+            showGameOver(gameOverEl, finalScoreEl, game.getScore(), game.stats, game.activeGame);
         }
 
         drawPose(ctx, currentPoseResults || {}, video, canvas, game);
@@ -162,7 +159,6 @@ function renderLoop(now) {
     requestAnimationFrame(renderLoop);
 }
 
-// FPS tracking vars
 let lastPoseTime = 0;
 let poseFrameCount = 0;
 let lastPoseFpsUpdate = 0;
@@ -198,12 +194,11 @@ function returnToMenu() {
     
     videoContainerEl.style.opacity = '0';
     
-    // Switch to Home Music
     audio.playMusic('home', 0.3);
 }
 
-async function start(mode) {
-    selectedMode = mode;
+async function start(gameInstance) {
+    selectedGame = gameInstance;
     hideElement(mainUiEl);
     hideElement(document.getElementById('hero-bg'));
     hideElement(document.getElementById('overlay-glow'));
@@ -215,17 +210,12 @@ async function start(mode) {
     
     setStatus(statusEl, 'SYSTEM INITIALIZING...');
 
-    // Initialize Audio on first user gesture
     await audio.init();
     
-    // Show Tutorial and wait for user to click OK
-    await showTutorial(mode);
+    await showTutorial(gameInstance);
 
-    // Switch to Game Music (depending on mode)
-    const musicKey = mode === GameMode.BUBBLE ? 'bubble' : 'egg';
-    audio.playMusic(musicKey, 0.4);
+    audio.playMusic(gameInstance.music, 0.4);
 
-    // Clear old data to prevent "ghost" poses from previous games
     currentPoseResults = null;
     handPoints = [];
     hipPoints = [];
@@ -243,14 +233,13 @@ async function start(mode) {
         }
 
         isStarted = true;
-        loop(); // Start processing frames immediately to warm up the model
+        loop();
 
         setStatus(statusEl, 'STAND IN FRAME');
         
-        // Wait for the first valid result from the model (warm-up phase)
         await new Promise((resolve) => {
             const checkReady = () => {
-                if (!isStarted) return; // User exited during warm-up
+                if (!isStarted) return;
                 if (currentPoseResults && currentPoseResults.poseLandmarks) {
                     resolve();
                 } else {
@@ -261,15 +250,10 @@ async function start(mode) {
         });
 
         if (!isStarted) return;
-
-        // Small extra delay to ensure GPU has finished all initial compilations
-        if (!isStarted) return;
         
-        // Calibration Phase
         setStatus(statusEl, 'ALIGN YOURSELF');
-        game.startCalibration(currentPlayArea, selectedMode);
+        game.startCalibration(currentPlayArea, gameInstance);
         
-        // Wait for calibration to complete
         await new Promise((resolve) => {
             const checkCalibration = () => {
                 if (!isStarted) return;
@@ -284,18 +268,15 @@ async function start(mode) {
 
         if (!isStarted) return;
 
-        if (selectedMode === GameMode.EGG) {
-            hideElement(statusEl);
-            showElement(interlockOverlayEl, 'flex');
-            await new Promise(r => setTimeout(r, 3000));
-            hideElement(interlockOverlayEl);
+        if (typeof gameInstance.onBeforeStart === 'function') {
+            await gameInstance.onBeforeStart();
         }
 
         if (!isStarted) return;
 
         await runCountdown(countdownEl, () => !isStarted);
         
-        if (!isStarted) return; // User exited during countdown
+        if (!isStarted) return;
         
         hideElement(statusEl);
         showElement(scoreContainerEl);
@@ -308,7 +289,7 @@ async function start(mode) {
             hideElement(gameTimerEl);
         }
         
-        game.start(selectedMode, selectedDuration);
+        game.start(gameInstance, selectedDuration);
         gameOverShown = false;
 
     } catch (err) {
@@ -325,25 +306,73 @@ async function start(mode) {
     }
 }
 
-// Timer Selection Logic
-document.querySelectorAll('.timer-selector').forEach(selector => {
-    selector.addEventListener('click', (e) => {
-        if (e.target.classList.contains('timer-btn')) {
-            // Remove active from all in this selector
-            selector.querySelectorAll('.timer-btn').forEach(btn => btn.classList.remove('active'));
-            e.target.classList.add('active');
-            
-            const time = parseInt(e.target.dataset.time);
-            selectedDuration = time;
+function renderGameSelection() {
+    const container = document.getElementById('game-selection');
+    if (!container) return;
+    container.innerHTML = '';
+
+    gamesRegistry.forEach(gameItem => {
+        const card = document.createElement('div');
+        card.className = `game-card${gameItem.locked ? ' locked secret' : ''}`;
+        if (gameItem.id) card.id = `card-${gameItem.id.toLowerCase()}`;
+
+        const rulesList = gameItem.rules.map(rule => `<li><span class="dot"></span>${rule}</li>`).join('');
+
+        let actionButtonHtml = '';
+        let timerSelectorHtml = '';
+
+        if (gameItem.locked) {
+            actionButtonHtml = `<button class="mode-btn action-btn disabled" disabled>COMING SOON</button>`;
+        } else {
+            timerSelectorHtml = `
+                <div class="timer-selector-container">
+                    <span class="timer-label">DURATION</span>
+                    <div class="timer-selector" data-for="${gameItem.id}">
+                        <button class="timer-btn active" data-time="60">1 min</button>
+                        <button class="timer-btn" data-time="300">5 min</button>
+                        <button class="timer-btn" data-time="0">∞</button>
+                    </div>
+                </div>
+            `;
+            actionButtonHtml = `<button class="mode-btn action-btn" data-mode="${gameItem.id}">PLAY</button>`;
+        }
+
+        card.innerHTML = `
+            <div class="card-content">
+                <div class="game-icon">${gameItem.icon}</div>
+                <h2>${gameItem.name}</h2>
+                <ul class="game-rules">
+                    ${rulesList}
+                </ul>
+                ${timerSelectorHtml}
+                ${actionButtonHtml}
+            </div>
+        `;
+
+        container.appendChild(card);
+
+        if (!gameItem.locked) {
+            // Bind timer selector clicks
+            card.querySelectorAll('.timer-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    card.querySelectorAll('.timer-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    selectedDuration = parseInt(e.target.dataset.time);
+                });
+            });
+
+            // Bind play button click
+            const playBtn = card.querySelector('.action-btn');
+            playBtn.addEventListener('click', () => start(gameItem));
         }
     });
-});
+}
+
+// Render dynamic game selection list
+renderGameSelection();
 
 backToMenuBtn.addEventListener('click', returnToMenu);
 homeBtn.addEventListener('click', returnToMenu);
-
-startBtn.addEventListener('click', () => start(GameMode.BUBBLE));
-eggBtn.addEventListener('click', () => start(GameMode.EGG));
 
 // About Modal
 aboutBtn.addEventListener('click', () => showElement(aboutOverlay, 'flex'));
@@ -380,7 +409,6 @@ menuToggle.addEventListener('click', () => {
     }
 });
 
-// Close menu when clicking any link inside it
 navMenu.querySelectorAll('a, button').forEach(item => {
     item.addEventListener('click', () => {
         if (item.id !== 'menu-toggle') {
@@ -391,7 +419,6 @@ navMenu.querySelectorAll('a, button').forEach(item => {
     });
 });
 
-// Close menu when clicking outside
 document.addEventListener('click', (e) => {
     if (!navMenu.contains(e.target) && !menuToggle.contains(e.target)) {
         navMenu.classList.add('menu-closed');
@@ -399,13 +426,11 @@ document.addEventListener('click', (e) => {
         menuToggle.classList.remove('menu-active');
     }
 });
+
 window.addEventListener('click', async (e) => {
     try {
         await audio.init();
-        
-        // Check if we clicked a button that starts the game
-        const isStartButtonClick = e.target.closest('#start-btn') || e.target.closest('#egg-btn');
-        
+        const isStartButtonClick = e.target.closest('.action-btn') && e.target.hasAttribute('data-mode');
         if (!isStarted && !isStartButtonClick) {
             audio.playMusic('home', 0.3);
         }

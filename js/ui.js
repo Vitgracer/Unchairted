@@ -82,75 +82,45 @@ export function updateTimer(element, remainingTime) {
     element.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 }
 
-export function showGameOver(overlay, scoreValEl, finalScore, stats, mode) {
+export function showGameOver(overlay, scoreValEl, finalScore, stats, gameInstance) {
     scoreValEl.textContent = finalScore;
     
     const statsContainer = document.getElementById('game-stats');
     let html = '';
 
-    if (mode === 'BUBBLE') {
-        html = `
-            <div class="stat-row">
-                <span class="stat-label">Bubbles Popped</span>
-                <span class="stat-value pos">${stats.popped}</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Bubbles Missed</span>
-                <span class="stat-value neg">${stats.missed}</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Lasers Avoided</span>
-                <span class="stat-value pos">${stats.lasersAvoided}</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Lasers Hit</span>
-                <span class="stat-value neg">${stats.lasersHit}</span>
-            </div>
-        `;
-    } else {
-        html = `
-            <div class="stat-row">
-                <span class="stat-label">Eggs Caught</span>
-                <span class="stat-value pos">${stats.eggsCaught}</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Eggs Broken</span>
-                <span class="stat-value neg">${stats.eggsBroken}</span>
-            </div>
-        `;
+    if (gameInstance && gameInstance.statsKeys) {
+        gameInstance.statsKeys.forEach(stat => {
+            const val = stats[stat.key] !== undefined ? stats[stat.key] : 0;
+            html += `
+                <div class="stat-row">
+                    <span class="stat-label">${stat.label}</span>
+                    <span class="stat-value ${stat.type}">${val}</span>
+                </div>
+            `;
+        });
     }
 
     statsContainer.innerHTML = html;
     overlay.classList.remove('hidden');
 }
 
-export async function showTutorial(mode) {
+export async function showTutorial(gameInstance) {
     const overlay = document.getElementById('tutorial-overlay');
     const gif = document.getElementById('tutorial-gif');
     const title = document.getElementById('tutorial-title');
     const instructions = document.getElementById('tutorial-instructions');
     const okBtn = document.getElementById('tutorial-ok-btn');
 
-    if (mode === 'BUBBLE') {
-        title.textContent = 'BUBBLE HUNTER';
-        gif.src = 'assets/gifs/bubble_hunter/tutorial.gif';
-        instructions.innerHTML = `
-            <ul>
-                <li>Pop bubbles with your <strong>hands</strong></li>
-                <li>Avoid the red <strong>laser</strong> (DUCK!)</li>
-                <li>Don't let bubbles escape!</li>
-            </ul>
-        `;
-    } else {
-        title.textContent = 'EGG CATCHER';
-        gif.src = 'assets/gifs/egg_catcher/tutorial.gif';
-        instructions.innerHTML = `
-            <ul>
-                <li>Bring <strong>hands together</strong> to spawn basket</li>
-                <li>Catch eggs in the target zones</li>
-                <li>Don't let them break on the floor!</li>
-            </ul>
-        `;
+    if (gameInstance && gameInstance.tutorial) {
+        title.textContent = gameInstance.tutorial.title;
+        gif.src = gameInstance.tutorial.gif;
+        
+        let listHtml = '<ul>';
+        gameInstance.tutorial.instructions.forEach(ins => {
+            listHtml += `<li>${ins}</li>`;
+        });
+        listHtml += '</ul>';
+        instructions.innerHTML = listHtml;
     }
 
     showElement(overlay, 'flex');

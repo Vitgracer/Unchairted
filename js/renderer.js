@@ -1,5 +1,3 @@
-import { GameMode } from './gameplay.js';
-
 /**
  * Handles custom drawing of landmarks, skeleton, and gameplay elements.
  */
@@ -467,272 +465,38 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
         drawPlayArea(ctx, sx, sy, minDim, '#ff0000', gameplayManager.isCalibrating);
     }
 
-    // 2. Draw Gameplay Elements (if active)
-    if (gameplayManager && gameplayManager.gameStarted) {
+    // 2. Draw Active Game Elements
+    if (gameplayManager && gameplayManager.gameStarted && gameplayManager.activeGame) {
+        const handPoints = lms ? [
+            getCenterOfMass(lms, [15, 17, 19, 21]), // Left
+            getCenterOfMass(lms, [16, 18, 20, 22])  // Right
+        ].filter(p => p !== null).map(p => mapLM(p)) : [];
 
-        // Draw Laser (Obstacle)
-        if (gameplayManager.laser) {
-            const laser = gameplayManager.laser;
-            ctx.save();
-
-            /*
-            // 1. Draw "Scanline"
-            ctx.strokeStyle = 'rgba(255, 0, 0, 0.15)';
-            ctx.setLineDash([5, 10]);
-            ctx.beginPath();
-            ctx.moveTo(sx, laser.y);
-            ctx.lineTo(sx + minDim, laser.y);
-            ctx.stroke();
-
-            // 2. Head Safety Indicator
-            if (headPoint) {
-                const isUnder = headPoint.y > laser.y;
-                const nearLaser = laser.x < headPoint.x + 100 && (laser.x + laser.width) > headPoint.x - 100;
-
-                ctx.save();
-                ctx.setLineDash([2, 5]);
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = isUnder ? 'rgba(0, 255, 0, 0.5)' : 'rgba(255, 0, 0, 0.8)';
-
-                if (!isUnder && nearLaser) {
-                    ctx.shadowBlur = 15;
-                    ctx.shadowColor = 'red';
-                    ctx.lineWidth = 4;
-                }
-
-                ctx.beginPath();
-                ctx.moveTo(headPoint.x, headPoint.y);
-                ctx.lineTo(headPoint.x, laser.y);
-                ctx.stroke();
-
-                ctx.beginPath();
-                ctx.arc(headPoint.x, laser.y, 5, 0, Math.PI * 2);
-                ctx.fillStyle = isUnder ? '#00FF00' : '#FF0000';
-                ctx.fill();
-                ctx.restore();
-            }
-            */
-
-            // 3. OPTIMIZED LASER (Smooth gradients, no expensive shadows)
-            const time = Date.now();
-            const pulseAlpha = 0.7 + Math.sin(time / 200) * 0.3; // Light pulsing for visibility
-            const warningPulse = (Math.sin(time / 150) + 1) / 2; // Faster pulsing for danger alert
-
-            // --- A. DANGER AMBIENT RED ALARM TINT & BORDER ---
-            // Pulsing full-screen red warning overlay tint to make the danger extremely noticeable
-            ctx.save();
-            ctx.fillStyle = `rgba(255, 0, 0, ${0.07 * warningPulse})`;
-            ctx.fillRect(sx, sy, minDim, minDim);
-
-            // Double-layered pulsing red warning border
-            ctx.strokeStyle = `rgba(255, 0, 0, ${0.12 * warningPulse})`;
-            ctx.lineWidth = 14;
-            ctx.strokeRect(sx, sy, minDim, minDim);
-            ctx.strokeStyle = `rgba(255, 0, 0, ${0.25 * warningPulse})`;
-            ctx.lineWidth = 4;
-            ctx.strokeRect(sx, sy, minDim, minDim);
-            ctx.restore();
-
-            // --- B. NEON DOTTED GUIDE LINE (Full width) ---
-            // Indicates the exact height of the incoming laser across the whole screen
-            ctx.save();
-            ctx.strokeStyle = `rgba(255, 0, 0, ${0.15 + warningPulse * 0.2})`;
-            ctx.lineWidth = 2;
-            ctx.setLineDash([8, 6]);
-            ctx.beginPath();
-            ctx.moveTo(sx, laser.y);
-            ctx.lineTo(sx + minDim, laser.y);
-            ctx.stroke();
-            ctx.restore();
-
-            // --- C. FLASHING WARNING BANNER & SIDE TAGS ---
-            // 1. Giant alert banner at the top of the play zone
-            ctx.save();
-            ctx.fillStyle = `rgba(0, 0, 0, ${0.45 * warningPulse})`;
-            ctx.fillRect(sx, sy + minDim * 0.08, minDim, 50);
-
-            ctx.font = '900 20px Syncopate, sans-serif';
-            ctx.fillStyle = `rgba(255, 0, 0, ${0.5 + warningPulse * 0.5})`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.translate(sx + minDim / 2, sy + minDim * 0.08 + 25);
-            ctx.scale(-1, 1); // Un-mirror
-            ctx.fillText('⚠️ LASER WARNING ⚠️', 0, 0);
-            ctx.restore();
-
-            // 2. Flashing duck! side tags at the height of the laser
-            ctx.save();
-            ctx.font = '900 12px Syncopate, sans-serif';
-            ctx.fillStyle = `rgba(255, 0, 0, ${0.4 + warningPulse * 0.6})`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-
-            const warningXPositions = [
-                sx + 50,            // Left edge
-                sx + minDim - 50    // Right edge
-            ];
-
-            warningXPositions.forEach(x => {
-                ctx.save();
-                ctx.translate(x, laser.y);
-                ctx.scale(-1, 1); // Un-mirror text for legibility
-                ctx.fillText('⚠️ DUCK!', 0, 0);
-                ctx.restore();
-            });
-            ctx.restore();
-
-            // --- D. THE LASER BEAM ITSELF ---
-            // --- Outer Glow (Massive Vertical Gradient - very fast) ---
-            const glowHeight = 100; // Increased for maximum visibility on mobile
-            const outerGrad = ctx.createLinearGradient(laser.x, laser.y - glowHeight / 2, laser.x, laser.y + glowHeight / 2);
-            outerGrad.addColorStop(0, 'rgba(255, 0, 0, 0)');
-            outerGrad.addColorStop(0.5, `rgba(255, 0, 0, ${0.3 * pulseAlpha})`);
-            outerGrad.addColorStop(1, 'rgba(255, 0, 0, 0)');
-            ctx.fillStyle = outerGrad;
-            ctx.fillRect(laser.x, laser.y - glowHeight / 2, laser.width, glowHeight);
-
-            // --- Main Beam Body (Neon core) ---
-            const beamGrad = ctx.createLinearGradient(laser.x, laser.y - 6, laser.x, laser.y + 6);
-            beamGrad.addColorStop(0, 'rgba(255, 50, 0, 0.4)');
-            beamGrad.addColorStop(0.5, `rgba(255, 0, 0, ${0.9 * pulseAlpha})`);
-            beamGrad.addColorStop(1, 'rgba(255, 50, 0, 0.4)');
-            ctx.fillStyle = beamGrad;
-            ctx.fillRect(laser.x, laser.y - 6, laser.width, 12);
-
-            // --- Razor Core (Extreme heat) ---
-            ctx.fillStyle = `rgba(255, 255, 255, ${0.95 * pulseAlpha})`;
-            ctx.fillRect(laser.x + 10, laser.y - 1, laser.width - 20, 2);
-
-            ctx.restore();
-        }
-
-        if (gameplayManager.mode === GameMode.BUBBLE) {
-            gameplayManager.getBubbles().forEach(bubble => {
-                ctx.save();
-                if (bubble.isPopped) {
-                    ctx.beginPath();
-                    ctx.arc(bubble.x, bubble.y, bubble.radius * (1 + bubble.popTimer / 10), 0, Math.PI * 2);
-                    ctx.strokeStyle = bubble.color;
-                    ctx.globalAlpha = 1 - bubble.popTimer / 10;
-                    ctx.lineWidth = 1;
-                    ctx.stroke();
-                } else {
-                    const grad = ctx.createRadialGradient(bubble.x, bubble.y, 0, bubble.x, bubble.y, bubble.radius);
-                    grad.addColorStop(0, bubble.color);
-                    grad.addColorStop(0.8, bubble.color);
-                    grad.addColorStop(1, 'rgba(255,255,255,0)');
-
-                    ctx.globalAlpha = 0.7;
-                    ctx.fillStyle = grad;
-                    ctx.beginPath();
-                    ctx.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-                ctx.restore();
-            });
-        } else if (gameplayManager.mode === GameMode.EGG) {
-            drawPerches(ctx, gameplayManager.getPerches(), gameplayManager.getBasket());
-            gameplayManager.getEggs().forEach(egg => drawEgg(ctx, egg));
-            drawBasket(ctx, gameplayManager.getBasket());
-        }
+        gameplayManager.activeGame.draw(ctx, canvas, { minX: sx, maxX: sx + minDim, minY: sy, size: minDim }, handPoints, headPoint);
     }
 
-    // 2. Draw Skeleton
+    // 3. Draw Skeleton
     if (lms && mapLM) {
         const head = headPoint;
         const leftHandArr = getCenterOfMass(lms, [15, 17, 19, 21]);
         const rightHandArr = getCenterOfMass(lms, [16, 18, 20, 22]);
         const leftHand = leftHandArr ? mapLM(leftHandArr) : null;
         const rightHand = rightHandArr ? mapLM(rightHandArr) : null;
-        const lShoulder = mapLM(lms[11]);
-        const rShoulder = mapLM(lms[12]);
-        const lElbow = mapLM(lms[13]);
-        const rElbow = mapLM(lms[14]);
-        const lHip = mapLM(lms[23]);
-        const rHip = mapLM(lms[24]);
-        const lKnee = mapLM(lms[25]);
-        const rKnee = mapLM(lms[26]);
-        const lAnkle = mapLM(lms[27]);
-        const rAnkle = mapLM(lms[28]);
 
         ctx.shadowBlur = 10;
         ctx.shadowColor = '#ff0000';
 
-        // --- SKELETON LINES (Commented out for debug) ---
-        /*
-        drawLine(ctx, lShoulder, rShoulder);
-        drawLine(ctx, lShoulder, lHip);
-        drawLine(ctx, rShoulder, rHip);
-        drawLine(ctx, lHip, rHip);
-        drawLine(ctx, lShoulder, lElbow);
-        drawLine(ctx, lElbow, leftHand);
-        drawLine(ctx, rShoulder, rElbow);
-        drawLine(ctx, rElbow, rightHand);
-        drawLine(ctx, lHip, lKnee);
-        drawLine(ctx, lKnee, lAnkle);
-        drawLine(ctx, rHip, rKnee);
-        drawLine(ctx, rKnee, rAnkle);
-        */
-
-        if (gameplayManager && (gameplayManager.mode === GameMode.BUBBLE || gameplayManager.isCalibrating)) {
+        if (gameplayManager && (gameplayManager.mode === 'BUBBLE' || gameplayManager.isCalibrating)) {
             ctx.shadowColor = '#ff0000';
             drawPoint(ctx, head, '#ff0000', 12, '#ff0000'); // Larger neon red head
         }
 
-        // Hand Interaction Zones (Bubble Mode) - 40px radius
-        if (gameplayManager && gameplayManager.mode === GameMode.BUBBLE) {
-            [leftHand, rightHand].forEach(hand => {
-                if (hand) {
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.arc(hand.x, hand.y, 40, 0, Math.PI * 2);
-                    ctx.strokeStyle = 'rgba(255, 0, 0, 0.4)'; // Red zones
-                    ctx.setLineDash([5, 5]);
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-
-                    // Optional: subtle glow inside
-                    ctx.fillStyle = 'rgba(255, 0, 0, 0.05)';
-                    ctx.fill();
-
-                    ctx.restore();
-                }
-            });
-        }
-
-        // Draw hand points only if no basket is being drawn
-        const isBasketActive = gameplayManager && gameplayManager.getBasket();
+        // Draw hand points only if no basket/active container is being drawn
+        const isBasketActive = gameplayManager && gameplayManager.activeGame && gameplayManager.activeGame.basket;
         if (!isBasketActive) {
             drawPoint(ctx, leftHand, '#ff0000', 10, '#ff0000'); // Neon red hands
             drawPoint(ctx, rightHand, '#ff0000', 10, '#ff0000');
         }
-
-        // --- OTHER JOINTS (Commented out for debug) ---
-        /*
-        [lShoulder, rShoulder, lElbow, rElbow, lHip, rHip, lKnee, rKnee, lAnkle, rAnkle].forEach(p => {
-            drawPoint(ctx, p, '#FFFFFF', 4);
-        });
-        */
-    }
-
-    // 3. Penalty Flash Overlay
-    if (gameplayManager && gameplayManager.isPenaltyActive) {
-        ctx.save();
-        ctx.fillStyle = 'rgba(255, 0, 0, 0.4)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        ctx.fillStyle = 'white';
-        ctx.font = '900 80px Outfit, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.shadowBlur = 20;
-        ctx.shadowColor = 'black';
-
-        // Mirror un-flip for text (same as play area label)
-        ctx.translate(canvas.width / 2, canvas.height / 2);
-        ctx.scale(-1, 1);
-        ctx.fillText('DUCK!', 0, 0);
-        ctx.restore();
     }
 
     // 4. Floating Score Effects (TikTok/Stream style)
@@ -741,22 +505,20 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
             ctx.save();
             ctx.globalAlpha = fx.life;
 
-            // Set font based on type
             if (fx.type === 'penalty') {
                 ctx.font = `900 ${fx.size}px Syncopate, sans-serif`;
-                ctx.fillStyle = '#ff0055'; // Magenta penalty
+                ctx.fillStyle = '#ff0055';
                 ctx.shadowBlur = 10;
                 ctx.shadowColor = '#ff0055';
             } else {
                 ctx.font = `900 ${fx.size}px Outfit, sans-serif`;
-                ctx.fillStyle = fx.type === 'pos' ? '#00ffcc' : '#ff9900'; // Cyan pos, Orange neg
+                ctx.fillStyle = fx.type === 'pos' ? '#00ffcc' : '#ff9900';
                 ctx.shadowBlur = 5;
                 ctx.shadowColor = 'rgba(0,0,0,0.5)';
             }
 
             ctx.textAlign = 'center';
 
-            // Un-mirror for text
             ctx.translate(fx.x, fx.y);
             ctx.scale(-1, 1);
             ctx.fillText(fx.text, 0, 0);
