@@ -472,7 +472,12 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
             getCenterOfMass(lms, [16, 18, 20, 22])  // Right
         ].filter(p => p !== null).map(p => mapLM(p)) : [];
 
-        gameplayManager.activeGame.draw(ctx, canvas, { minX: sx, maxX: sx + minDim, minY: sy, size: minDim }, handPoints, headPoint);
+        const shoulderPoints = lms ? [
+            mapLM(lms[11]), // Left Shoulder
+            mapLM(lms[12])  // Right Shoulder
+        ] : [];
+
+        gameplayManager.activeGame.draw(ctx, canvas, { minX: sx, maxX: sx + minDim, minY: sy, size: minDim }, handPoints, headPoint, shoulderPoints);
     }
 
     // 3. Draw Skeleton

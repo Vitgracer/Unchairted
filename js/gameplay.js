@@ -144,7 +144,7 @@ export class GameplayManager {
         }
     }
 
-    update(canvasWidth, canvasHeight, handPoints, playArea = null, dt, headPoint = null) {
+    update(canvasWidth, canvasHeight, handPoints, playArea = null, dt, headPoint = null, shoulderPoints = []) {
         if (!this.gameStarted || !dt) return;
 
         if (playArea) {
@@ -170,7 +170,7 @@ export class GameplayManager {
 
         // Delegate update to active game
         if (this.activeGame) {
-            this.activeGame.update(dt, handPoints, headPoint, this.playArea, this.difficultyPhase, (text, type) => this.addEffect(text, type));
+            this.activeGame.update(dt, handPoints, headPoint, this.playArea, this.difficultyPhase, (text, type) => this.addEffect(text, type), shoulderPoints);
             this.score = this.activeGame.score;
         }
 

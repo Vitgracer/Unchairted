@@ -1,9 +1,11 @@
 import { BubbleHunterGame } from './bubble_hunter.js';
 import { EggCatcherGame } from './egg_catcher.js';
+import { GravityDeniedGame } from './gravity_denied.js';
 
 export const gamesRegistry = [
     new BubbleHunterGame(),
     new EggCatcherGame(),
+    new GravityDeniedGame(),
     {
         id: 'SECRET',
         name: 'SECRET MODE',

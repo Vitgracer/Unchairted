@@ -113,7 +113,12 @@ export async function showTutorial(gameInstance) {
 
     if (gameInstance && gameInstance.tutorial) {
         title.textContent = gameInstance.tutorial.title;
-        gif.src = gameInstance.tutorial.gif;
+        if (gameInstance.tutorial.gif) {
+            gif.src = gameInstance.tutorial.gif;
+            gif.parentElement.style.display = 'block';
+        } else {
+            gif.parentElement.style.display = 'none';
+        }
         
         let listHtml = '<ul>';
         gameInstance.tutorial.instructions.forEach(ins => {

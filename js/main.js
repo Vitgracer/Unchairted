@@ -41,6 +41,7 @@ let currentPoseResults = null;
 let handPoints = [];
 let hipPoints = [];
 let headPoint = null;
+let shoulderPoints = [];
 let currentPlayArea = null;
 let selectedGame = gamesRegistry.find(g => !g.locked);
 let selectedDuration = 60; // default 1 min
@@ -104,10 +105,16 @@ function onPoseResults(results) {
             ];
 
             headPoint = mapLM(lms[0]); // Nose as head center
+
+            shoulderPoints = [
+                mapLM(lms[11]), // Left Shoulder
+                mapLM(lms[12])  // Right Shoulder
+            ];
         } else {
             handPoints = [];
             hipPoints = [];
             headPoint = null;
+            shoulderPoints = [];
         }
     }
 }
@@ -144,7 +151,7 @@ function renderLoop(now) {
         }
 
         if (game.gameStarted) {
-            game.update(canvas.width, canvas.height, handPoints, currentPlayArea, deltaTime, headPoint);
+            game.update(canvas.width, canvas.height, handPoints, currentPlayArea, deltaTime, headPoint, shoulderPoints);
             updateScore(scoreValEl, game.getScore());
             updateTimer(gameTimerEl, game.remainingTime);
         } else if (isStarted && !game.gameStarted && !gameOverShown && game.remainingTime === 0 && !game.isCalibrating) {
@@ -220,6 +227,7 @@ async function start(gameInstance) {
     handPoints = [];
     hipPoints = [];
     headPoint = null;
+    shoulderPoints = [];
 
     try {
         if (!pose) {
