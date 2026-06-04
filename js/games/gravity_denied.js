@@ -265,7 +265,7 @@ export class GravityDeniedGame extends BaseGame {
             const dx = L.x - R.x;
             const dy = L.y - R.y;
             const rad = Math.atan2(dy, dx);
-            this.currentAngle = rad * 180 / Math.PI;
+            this.currentAngle = -(rad * 180 / Math.PI);
         } else {
             // No shoulder input, default to upright
             this.currentAngle = 0;
@@ -711,7 +711,6 @@ export class GravityDeniedGame extends BaseGame {
 
         // Dashboard text label
         ctx.save();
-        ctx.scale(-1, 1); // Flip back to draw readable text
         ctx.font = 'bold 9px Syncopate, sans-serif';
         ctx.fillStyle = '#aaa';
         ctx.textAlign = 'center';
