@@ -7,8 +7,6 @@ export class GravityDeniedGame extends BaseGame {
         this.id = 'GRAVITY';
         this.name = 'Gravity Denied';
         this.icon = '🏍️';
-        this.locked = true;
-        this.comingSoon = true;
         this.music = 'egg'; // reuse egg music for fast tempo
         this.rules = [
             'Lean shoulders to match the terrain slope',
