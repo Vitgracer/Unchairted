@@ -7,7 +7,7 @@ export class GravityDeniedGame extends BaseGame {
         this.id = 'GRAVITY';
         this.name = 'Gravity Denied';
         this.icon = '🏍️';
-        this.music = 'egg'; // reuse egg music for fast tempo
+        this.music = 'gravity';
         this.rules = [
             'Keep shoulders parallel the terrain slope',
             'Keep matching to ride: <span class="pts pts-up">+10 PTS / 10m</span>',
@@ -434,7 +434,7 @@ export class GravityDeniedGame extends BaseGame {
         this.stats.crashes++;
         this.score = Math.max(0, this.score - 50);
         addEffect('-50 CRASH', 'penalty');
-        audio.play('laserFail', 1.0);
+        audio.play('bikeCrash', 1.0);
 
         // Find the pit segment we crashed in
         const terrain = this.getTerrainAt(this.bikeX);

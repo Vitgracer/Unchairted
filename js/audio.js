@@ -19,13 +19,15 @@ class AudioManager {
             eggCatch: 'assets/audio/egg_catch.mp3',
             eggCrash: 'assets/audio/egg_crash.mp3',
             laserFail: 'assets/audio/laser_fail.mp3',
-            timer: 'assets/audio/timer.mp3'
+            timer: 'assets/audio/timer.mp3',
+            bikeCrash: 'assets/audio/bike_crash.mp3'
         };
         
         this.musicFiles = {
             home: 'assets/audio/background_home.mp3',
             bubble: 'assets/audio/background_bubble_hunter.mp3',
-            egg: 'assets/audio/background_egg_catcher.mp3'
+            egg: 'assets/audio/background_egg_catcher.mp3',
+            gravity: 'assets/audio/background_gravity_denied.mp3'
         };
     }
 
