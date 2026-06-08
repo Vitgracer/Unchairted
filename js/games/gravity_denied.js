@@ -9,10 +9,10 @@ export class GravityDeniedGame extends BaseGame {
         this.icon = '🏍️';
         this.music = 'egg'; // reuse egg music for fast tempo
         this.rules = [
-            'Lean shoulders to match the terrain slope',
+            'Keep shoulders parallel the terrain slope',
             'Keep matching to ride: <span class="pts pts-up">+10 PTS / 10m</span>',
             'Wrong angle = BRAKES motorcycle 🛑',
-            'JUMP (bounce up) to cross road pits! <span class="pts pts-penalty">CRASH if missed (-50 PTS)</span>'
+            'JUMP to cross road pits! <span class="pts pts-penalty">CRASH (-50 PTS)</span>'
         ];
         this.tutorial = {
             title: 'GRAVITY DENIED',
