@@ -31,7 +31,7 @@ export class GravityDeniedGame extends BaseGame {
         ];
 
         // Constants
-        this.bikeMaxSpeed = 260; // pixels/s
+        this.bikeMaxSpeed = 240; // pixels/s
         this.bikeAccel = 150;
         this.bikeBrake = 300;
         this.gravity = 900; // pixels/s^2 for jump
@@ -106,7 +106,7 @@ export class GravityDeniedGame extends BaseGame {
         this.segments.push({
             startX: 0,
             startY: startY,
-            endX: 600,
+            endX: 800,
             endY: startY,
             angle: 0,
             type: 'flat',
@@ -137,7 +137,7 @@ export class GravityDeniedGame extends BaseGame {
             // Choose segment type
             let type;
             let angle = 0;
-            let length = Math.random() * 120 + 180; // horizontal width
+            let length = (Math.random() * 120 + 180) * 1.33; // horizontal width
 
             // Constraints: no sequential pits
             const lastWasPit = last.type === 'pit';
@@ -153,7 +153,7 @@ export class GravityDeniedGame extends BaseGame {
             if (chosen === 'flat') {
                 type = 'flat';
                 angle = 0;
-                length = Math.random() * 120 + 200;
+                length = (Math.random() * 120 + 200) * 1.33;
             } else if (chosen === 'climb') {
                 // If already too high, force descent or flat
                 if (heightFactor < 0.40) {
@@ -178,7 +178,7 @@ export class GravityDeniedGame extends BaseGame {
                 // Pit
                 type = 'pit';
                 angle = 0;
-                length = 130; // standard pit gap width
+                length = 100; // standard pit gap width
             }
 
             const rad = angle * Math.PI / 180;
@@ -233,28 +233,12 @@ export class GravityDeniedGame extends BaseGame {
         if (this.crashTimer > 0) {
             this.crashTimer -= dt;
             this.bikeSpeed = 0;
-            if (this.crashTimer <= 0) {
-                // Recover from crash: spawn a flat segment ahead to continue
-                // Find where the bike currently is and clean up segments around it
-                const ground = this.getTerrainAt(this.bikeX);
-                const currentY = ground.y;
-                this.segments = this.segments.filter(s => s.endX > this.bikeX);
-                
-                // Prepend a flat segment under the bike to rescue it
-                this.segments.unshift({
-                    startX: this.bikeX - 100,
-                    startY: currentY,
-                    endX: this.bikeX + 250,
-                    endY: currentY,
-                    angle: 0,
-                    type: 'flat',
-                    isCleared: false
-                });
-                this.yOffset = 0;
-                this.yVelocity = 0;
-                this.isGrounded = true;
-                this.graceTimer = 1.5;
-            }
+            
+            // Keep camera centered on the bike and extend/clean terrain
+            this.cameraX = this.bikeX - playArea.size * 0.25;
+            this.extendTerrain(playArea);
+            this.segments = this.segments.filter(s => s.endX > this.cameraX - 100);
+            
             return;
         }
 
@@ -444,6 +428,17 @@ export class GravityDeniedGame extends BaseGame {
         this.score = Math.max(0, this.score - 50);
         addEffect('-50 CRASH', 'penalty');
         audio.play('laserFail', 1.0);
+
+        // Find the pit segment we crashed in
+        const terrain = this.getTerrainAt(this.bikeX);
+        if (terrain && terrain.segment && terrain.type === 'pit') {
+            // Place bike after the pit
+            this.bikeX = terrain.segment.endX + 20;
+        }
+        this.yOffset = 0;
+        this.yVelocity = 0;
+        this.isGrounded = true;
+        this.graceTimer = 1.5;
     }
 
     draw(ctx, canvas, playArea, handPoints, headPoint, shoulderPoints = []) {
