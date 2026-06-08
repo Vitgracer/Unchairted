@@ -106,7 +106,7 @@ export class GravityDeniedGame extends BaseGame {
         this.segments.push({
             startX: 0,
             startY: startY,
-            endX: 800,
+            endX: 600,
             endY: startY,
             angle: 0,
             type: 'flat',
@@ -137,7 +137,7 @@ export class GravityDeniedGame extends BaseGame {
             // Choose segment type
             let type;
             let angle = 0;
-            let length = (Math.random() * 120 + 180) * 1.33; // horizontal width
+            let length = (Math.random() * 120 + 180); // horizontal width
 
             // Constraints: no sequential pits
             const lastWasPit = last.type === 'pit';
@@ -153,7 +153,7 @@ export class GravityDeniedGame extends BaseGame {
             if (chosen === 'flat') {
                 type = 'flat';
                 angle = 0;
-                length = (Math.random() * 120 + 200) * 1.33;
+                length = (Math.random() * 120 + 200);
             } else if (chosen === 'climb') {
                 // If already too high, force descent or flat
                 if (heightFactor < 0.40) {
