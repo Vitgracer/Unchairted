@@ -498,7 +498,8 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
 
         // Draw hand points only if no basket/active container is being drawn
         const isBasketActive = gameplayManager && gameplayManager.activeGame && gameplayManager.activeGame.basket;
-        if (!isBasketActive) {
+        const isGravityActive = gameplayManager && gameplayManager.activeGame && gameplayManager.activeGame.id === 'GRAVITY';
+        if (!isBasketActive && !isGravityActive) {
             drawPoint(ctx, leftHand, '#ff0000', 10, '#ff0000'); // Neon red hands
             drawPoint(ctx, rightHand, '#ff0000', 10, '#ff0000');
         }

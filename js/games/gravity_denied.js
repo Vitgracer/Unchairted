@@ -706,13 +706,19 @@ export class GravityDeniedGame extends BaseGame {
 
         // Dashboard text label
         ctx.save();
-        ctx.font = 'bold 9px Syncopate, sans-serif';
-        ctx.fillStyle = '#aaa';
         ctx.textAlign = 'center';
-        ctx.fillText('LEAN ANGLE', 0, 18);
-        ctx.font = '900 12px Outfit, sans-serif';
-        ctx.fillStyle = isMatched ? '#00ffcc' : '#ff0055';
-        ctx.fillText(`${Math.round(this.currentAngle)}° / ${Math.round(this.targetAngle)}°`, 0, 32);
+        
+        // Current angle (YOU)
+        ctx.font = '900 11px Outfit, sans-serif';
+        const userColor = isMatched ? '#00ffcc' : '#ff9900';
+        ctx.fillStyle = userColor;
+        ctx.fillText(`YOU (SHOULDERS): ${Math.round(this.currentAngle)}°`, 0, 18);
+        
+        // Target angle (ROAD)
+        ctx.font = '900 11px Outfit, sans-serif';
+        ctx.fillStyle = '#ff0055';
+        ctx.fillText(`ROAD (SLOPE): ${Math.round(this.targetAngle)}°`, 0, 32);
+        
         ctx.restore();
 
         ctx.restore();
