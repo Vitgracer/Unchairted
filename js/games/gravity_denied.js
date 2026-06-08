@@ -16,7 +16,7 @@ export class GravityDeniedGame extends BaseGame {
         ];
         this.tutorial = {
             title: 'GRAVITY DENIED',
-            gif: 'assets/gifs/gravity_denied/tutorial.png',
+            gif: 'assets/gifs/gravity_denied/tutorial.gif',
             instructions: [
                 'Lean your shoulders parallel to the road slope',
                 'Do a quick jump to cross road pits',

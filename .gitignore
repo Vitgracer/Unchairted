@@ -2,6 +2,7 @@
 *.mp4
 assets/frames
 assets/full_frames
+assets/frames_gif_gravity
 assets/gifs/bubble_hunter/frame_0446.jpg
 assets/gifs/bubble_hunter/frame_0447.jpg
 assets/gifs/bubble_hunter/frame_0448.jpg
@@ -336,3 +337,13 @@ assets/gifs/gameplay_egg_catcher/frame_2297.jpg
 assets/gifs/gameplay_egg_catcher/frame_2298.jpg
 assets/gifs/gameplay_egg_catcher/frame_2299.jpg
 assets/gifs/gameplay_egg_catcher/frame_2300.jpg
+assets/gifs/gravity_denied/frame_0768.jpg
+assets/gifs/gravity_denied/frame_0779.jpg
+assets/gifs/gravity_denied/frame_0784.jpg
+assets/gifs/gravity_denied/frame_0791.jpg
+assets/gifs/gravity_denied/frame_0795.jpg
+assets/gifs/gravity_denied/frame_0802.jpg
+assets/gifs/gravity_denied/frame_0804.jpg
+assets/gifs/gravity_denied/frame_0807.jpg
+assets/gifs/gravity_denied/frame_0814.jpg
+assets/gifs/gravity_denied/frame_0816.jpg
