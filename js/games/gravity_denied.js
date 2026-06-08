@@ -306,7 +306,21 @@ export class GravityDeniedGame extends BaseGame {
             // - cooldown: 1.5s between jumps
             // - require at least 2 recent frames showing upward motion
             if (this.headYBaseline !== null && this.jumpCooldown <= 0 && this.isGrounded) {
-                const threshold = 55;
+                // Calculate dynamic threshold based on shoulder width to normalize for distance and screen size
+                let threshold = 55;
+                let upwardMotionThreshold = 20;
+                if (shoulderPoints && shoulderPoints.length === 2) {
+                    const L = shoulderPoints[0];
+                    const R = shoulderPoints[1];
+                    const dx = L.x - R.x;
+                    const dy = L.y - R.y;
+                    const shoulderWidth = Math.sqrt(dx * dx + dy * dy);
+                    if (shoulderWidth > 20) {
+                        threshold = shoulderWidth * 0.45;
+                        upwardMotionThreshold = shoulderWidth * 0.16;
+                    }
+                }
+
                 const isAboveThreshold = headPoint.y < this.headYBaseline - threshold;
 
                 // Check that head is actually moving upward (not just tilted)
@@ -316,7 +330,7 @@ export class GravityDeniedGame extends BaseGame {
                     // Head Y should be decreasing (going up) over last few frames
                     const oldY = recentFrames[0];
                     const newY = recentFrames[recentFrames.length - 1];
-                    movingUp = (oldY - newY) > 20; // at least 20px upward motion in recent frames
+                    movingUp = (oldY - newY) > upwardMotionThreshold;
                 }
 
                 if (isAboveThreshold && movingUp) {
@@ -835,7 +849,19 @@ export class GravityDeniedGame extends BaseGame {
             if (headPoint) {
                 // Jump threshold line
                 if (this.headYBaseline !== null) {
-                    const jumpTargetY = this.headYBaseline - 55;
+                    // Calculate the same dynamic threshold for drawing the guideline
+                    let threshold = 55;
+                    if (shoulderPoints && shoulderPoints.length === 2) {
+                        const L = shoulderPoints[0];
+                        const R = shoulderPoints[1];
+                        const dx = L.x - R.x;
+                        const dy = L.y - R.y;
+                        const shoulderWidth = Math.sqrt(dx * dx + dy * dy);
+                        if (shoulderWidth > 20) {
+                            threshold = shoulderWidth * 0.45;
+                        }
+                    }
+                    const jumpTargetY = this.headYBaseline - threshold;
                     ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
                     ctx.setLineDash([5, 5]);
                     ctx.lineWidth = 2;
