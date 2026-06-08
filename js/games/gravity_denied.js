@@ -139,12 +139,19 @@ export class GravityDeniedGame extends BaseGame {
             let angle = 0;
             let length = (Math.random() * 120 + 180); // horizontal width
 
-            // Constraints: no sequential pits
-            const lastWasPit = last.type === 'pit';
+            // Constraints: at least 3 segments between pits
+            let canBePit = true;
+            for (let i = 1; i <= 3; i++) {
+                const idx = this.segments.length - i;
+                if (idx >= 0 && this.segments[idx].type === 'pit') {
+                    canBePit = false;
+                    break;
+                }
+            }
             const heightFactor = (startY - playArea.minY) / playArea.size; // 0 (top) to 1 (bottom)
 
             const choices = ['flat', 'climb', 'descent'];
-            if (!lastWasPit) {
+            if (canBePit) {
                 choices.push('pit');
             }
 
