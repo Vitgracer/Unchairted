@@ -486,18 +486,39 @@ export class GravityDeniedGame extends BaseGame {
             if (x2 < sx || x1 > sx + minDim) return;
 
             if (seg.type === 'pit') {
-                // Draw pit background gap
+                // Draw pit background gap with a strong neon glow
                 ctx.save();
-                ctx.strokeStyle = 'rgba(255, 0, 85, 0.4)';
+                ctx.strokeStyle = '#ff0055';
                 ctx.lineWidth = 4;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#ff0055';
                 ctx.setLineDash([6, 6]);
                 ctx.beginPath();
                 ctx.moveTo(x1, y1);
                 ctx.lineTo(x2, y2);
                 ctx.stroke();
+                ctx.restore();
 
-                // Draw pit neon alert block under the road
-                ctx.fillStyle = 'rgba(255, 0, 85, 0.08)';
+                // Draw fire emojis lining the pit
+                ctx.save();
+                ctx.font = '22px serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                const step = 28;
+                for (let x = x1 + 14; x < x2; x += step) {
+                    ctx.save();
+                    ctx.translate(x, y1 + 5);
+                    ctx.scale(-1, 1); // Unmirror emoji
+                    // Add a slight vertical offset pulse based on time
+                    const pulse = Math.sin(Date.now() / 100 + x) * 2;
+                    ctx.fillText('🔥', 0, pulse);
+                    ctx.restore();
+                }
+                ctx.restore();
+
+                // Draw pit neon alert block under the road (slightly brighter)
+                ctx.save();
+                ctx.fillStyle = 'rgba(255, 0, 85, 0.12)';
                 ctx.fillRect(x1, y1, x2 - x1, sy + minDim - y1);
                 ctx.restore();
             } else {
