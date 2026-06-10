@@ -74,6 +74,17 @@ Remember that classic handheld game where the wolf catches eggs? (Yeah, the Sovi
   <img src="assets/gifs/gameplay_egg_catcher/gameplay_egg_catcher.gif" width="40%" />
 </p>
 
+#### 🏍️ Mode 3: Gravity Denied
+A tribute to the legendary side-scrolling trials game, now controlled by your body!
+*   **The Goal**: Ride your motorcycle across a procedurally generated landscape. Keep your shoulders parallel to the road slope to maintain max speed.
+*   **The Catch**: Aligning your shoulders with the slope accelerates your bike. If your posture is off, the brakes lock up! Also, watch out for sudden pits in the road — you must perform a quick physical **JUMP** to fly over them.
+*   **HUD Gauges**: Includes a real-time Leaning HUD Dial comparing your shoulder angle to the road's current slope, a speedometer (KM/H), and a dynamic JUMP LINE overlay.
+*   **Scoring**: Distance Ridden = +10 PTS / 10m | Perfect Slope Leaning = +5 XP/s | Crash (hitting a pit) = -50 PTS.
+
+<p align="left">
+  <img src="assets/gifs/gravity_denied_gameplay/tutorial.gif" width="50%" alt="Gravity Denied Gameplay" />
+</p>
+
 ## 🩺 The Health Check (Muscle Map)
 Playing this isn't just for points; it's for your gains.
 
@@ -81,6 +92,7 @@ Playing this isn't just for points; it's for your gains.
 |------|----------------|
 | **Bubble Hunter** | Deltoids, Traps, Obliques, Quads/Glutes | 
 | **Egg Catcher** | Reflexes, Core Stability, Lower Body, Lower Back | 
+| **Gravity Denied** | Obliques (side-leaning), Core stability, Quads/Calves/Glutes (jumping), Neck/Upper Back |
 
 > [!TIP]
 > It's basically a HIIT session disguised as a browser game. Great for kids too — keeps them moving instead of slouching!
