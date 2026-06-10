@@ -438,7 +438,11 @@ function drawCalibration(ctx, gameplayManager) {
 
 export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
     ctx.save();
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (video && video.videoWidth > 0) {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
 
     // 1. Draw Gameplay Elements (if active)
     const vWidth = video.videoWidth;
@@ -454,6 +458,55 @@ export function drawPose(ctx, results, video, canvas, gameplayManager = null) {
     }) : null;
 
     const headPoint = (lms && mapLM) ? mapLM(lms[0]) : null;
+
+    // Face blurring for Gravity Denied gameplay
+    if (gameplayManager && gameplayManager.gameStarted && gameplayManager.activeGame && gameplayManager.activeGame.id === 'GRAVITY' && lms && mapLM) {
+        const nosePt = mapLM(lms[0]);
+        let faceWidth = 0;
+        
+        if (lms[7] && lms[8] && lms[7].visibility > 0.3 && lms[8].visibility > 0.3) {
+            const earL = mapLM(lms[7]);
+            const earR = mapLM(lms[8]);
+            const dx = earL.x - earR.x;
+            const dy = earL.y - earR.y;
+            faceWidth = Math.sqrt(dx * dx + dy * dy) * 1.1;
+        } else if (lms[2] && lms[5] && lms[2].visibility > 0.3 && lms[5].visibility > 0.3) {
+            const eyeL = mapLM(lms[2]);
+            const eyeR = mapLM(lms[5]);
+            const dx = eyeL.x - eyeR.x;
+            const dy = eyeL.y - eyeR.y;
+            faceWidth = Math.sqrt(dx * dx + dy * dy) * 2.2;
+        }
+
+        if (faceWidth > 20 && nosePt) {
+            const cx = nosePt.x;
+            const cy = nosePt.y;
+            const r = (faceWidth / 2) * 1.5;
+
+            if (r > 0) {
+                // 1. Smooth Blur
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+                ctx.clip();
+
+                ctx.filter = 'blur(20px)';
+                ctx.drawImage(canvas, 0, 0);
+                ctx.restore();
+
+                // // 2. Glowing neon circle boundary
+                // ctx.save();
+                // ctx.strokeStyle = '#ff0055';
+                // ctx.lineWidth = 3;
+                // ctx.shadowBlur = 15;
+                // ctx.shadowColor = '#ff0055';
+                // ctx.beginPath();
+                // ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+                // ctx.stroke();
+                // ctx.restore();
+            }
+        }
+    }
 
     // 0. Draw Calibration Targets (if active)
     if (gameplayManager && gameplayManager.isCalibrating) {
